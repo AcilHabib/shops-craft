@@ -1,11 +1,12 @@
 import clsx from 'clsx';
 import { Suspense } from 'react';
 
-import { getCollections } from 'lib/shopify';
+// import { getCollections } from 'lib/shopify';
+import { mockCollections } from 'lib/mock';
 import FilterList from './filter';
 
 async function CollectionList() {
-  const collections = await getCollections();
+  const collections = mockCollections; // Mock data for testing
   return <FilterList list={collections} title="Collections" />;
 }
 
