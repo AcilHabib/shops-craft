@@ -5,11 +5,11 @@ export const mockCart: Cart = {
   checkoutUrl: "https://checkout.example.com/cart123",
   cost: {
     subtotalAmount: {
-      amount: "90.00",
+      amount: "0.00",
       currencyCode: "USD",
     },
     totalAmount: {
-      amount: "95.00",
+      amount: "5.00",
       currencyCode: "USD",
     },
     totalTaxAmount: {
@@ -17,7 +17,7 @@ export const mockCart: Cart = {
       currencyCode: "USD",
     },
   },
-  totalQuantity: 3,
+  totalQuantity: 0,
   lines: [],
 };
 
@@ -119,7 +119,7 @@ export const mockProduct: Product = {
 };
 
 export const mockProductShoes: Product = {
-  id: "gid://shopify/Product/98765",
+  id: "gid://shopify/Product/98767",
   handle: "men's-casual-flat",
   title: "MEN'S CASUAL FLAT",
   description: "A super cozy unisex hoodie made from organic cotton.",
@@ -222,7 +222,7 @@ export const mockProductShoes: Product = {
 };
 
 export const mockProductHeadwear: Product = {
-  id: "gid://shopify/Product/98765",
+  id: "gid://shopify/Product/98766",
   handle: "headwear",
   title: "Headwear",
   description: "A super cozy unisex hoodie made from organic cotton.",

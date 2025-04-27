@@ -6,7 +6,6 @@ import clsx from 'clsx';
 import LoadingDots from 'components/loading-dots';
 import Price from 'components/price';
 import { DEFAULT_OPTION } from 'lib/constants';
-import { mockCart } from 'lib/mock';
 import { createUrl } from 'lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,6 +13,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createCartAndSetCookie, redirectToCheckout } from './actions';
 import { useCart } from './cart-context';
+import { useMyCart } from './CartProvider';
 import { DeleteItemButton } from './delete-item-button';
 import { EditItemQuantityButton } from './edit-item-quantity-button';
 import OpenCart from './open-cart';
@@ -23,7 +23,8 @@ type MerchandiseSearchParams = {
 };
 
 export default function CartModal() {
-  const { cart, updateCartItem } = useCart();
+  const { updateCartItem } = useCart();
+  const { cart } = useMyCart();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
   const openCart = () => setIsOpen(true);
@@ -83,7 +84,7 @@ export default function CartModal() {
                 </button>
               </div>
 
-              {!mockCart || mockCart.lines.length === 0 ? (
+              {!cart || cart.lines.length === 0 ? (
                 <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
                   <ShoppingCartIcon className="h-16" />
                   <p className="mt-6 text-center text-2xl font-bold">
@@ -93,7 +94,7 @@ export default function CartModal() {
               ) : (
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                   <ul className="grow overflow-auto py-4">
-                    {mockCart.lines
+                    {cart.lines
                       .sort((a, b) =>
                         a.merchandise.product.title.localeCompare(
                           b.merchandise.product.title
@@ -199,8 +200,8 @@ export default function CartModal() {
                       <p>Taxes</p>
                       <Price
                         className="text-right text-base text-black dark:text-white"
-                        amount={mockCart.cost.totalTaxAmount.amount}
-                        currencyCode={mockCart.cost.totalTaxAmount.currencyCode}
+                        amount={cart.cost.totalTaxAmount.amount}
+                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
                       />
                     </div>
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
@@ -211,8 +212,8 @@ export default function CartModal() {
                       <p>Total</p>
                       <Price
                         className="text-right text-base text-black dark:text-white"
-                        amount={mockCart.cost.totalAmount.amount}
-                        currencyCode={mockCart.cost.totalAmount.currencyCode}
+                        amount={cart.cost.totalAmount.amount}
+                        currencyCode={cart.cost.totalAmount.currencyCode}
                       />
                     </div>
                   </div>

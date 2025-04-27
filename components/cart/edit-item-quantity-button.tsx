@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { updateItemQuantity } from 'components/cart/actions';
 import type { CartItem } from 'lib/shopify/types';
 import { useActionState } from 'react';
+import { useMyCart } from './CartProvider';
 
 function SubmitButton({ type }: { type: 'plus' | 'minus' }) {
   return (
@@ -39,18 +40,39 @@ export function EditItemQuantityButton({
   optimisticUpdate: any;
 }) {
   const [message, formAction] = useActionState(updateItemQuantity, null);
-  const payload = {
-    merchandiseId: item.merchandise.id,
-    quantity: type === 'plus' ? item.quantity + 1 : item.quantity - 1
-  };
-  const updateItemQuantityAction = formAction.bind(null, payload);
+  // const payload = {
+  //   merchandiseId: item.merchandise.id,
+  //   quantity: type === 'plus' ? item.quantity + 1 : item.quantity - 1
+  // };
+  // const updateItemQuantityAction = formAction.bind(null, payload);
+
+  const { cartItem, setCartItem } = useMyCart();
+
+  const handleUpdateItemQuantity = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const updatedCart = cartItem.map((cartItem) => {
+      if (cartItem.id === item.id) {
+        return {
+          ...cartItem,
+          quantity: type === 'plus' ? cartItem.quantity + 1 : cartItem.quantity - 1
+        };
+      }
+      
+      return cartItem;
+    });
+
+    setCartItem(updatedCart);
+  }
 
   return (
     <form
-      action={async () => {
-        optimisticUpdate(payload.merchandiseId, type);
-        updateItemQuantityAction();
-      }}
+      // action={async () => {
+      //   optimisticUpdate(payload.merchandiseId, type);
+      //   updateItemQuantityAction();
+      // }}
+
+      onSubmit={handleUpdateItemQuantity}
     >
       <SubmitButton type={type} />
       <p aria-live="polite" className="sr-only" role="status">

@@ -4,10 +4,10 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { addItem } from 'components/cart/actions';
 import { useProduct } from 'components/product/product-context';
-import { mockCart } from 'lib/mock';
 import { CartItem, Product, ProductVariant } from 'lib/shopify/types';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState } from 'react';
 import { useCart } from './cart-context';
+import { useMyCart } from './CartProvider';
 
 function SubmitButton({
   availableForSale,
@@ -61,9 +61,10 @@ function SubmitButton({
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
   const { addCartItem } = useCart();
+  const { cartItem, setCartItem } = useMyCart();
   const { state } = useProduct();
   const [message, formAction] = useActionState(addItem, null);
-  const [cartState, setCartState] = useState<CartItem[]>([]);
+  // const [cartState, setCartItem] = useState<CartItem[]>([]);
 
   const variant = variants.find((variant: ProductVariant) =>
     variant.selectedOptions.every(
@@ -77,26 +78,21 @@ export function AddToCart({ product }: { product: Product }) {
     (variant) => variant.id === selectedVariantId
   )!;
 
-  useEffect(() => {
-    console.log('cartState', cartState);
-    mockCart.lines = cartState;
-  }, [cartState])
+  const checkExistingItem = (cartItem: CartItem[], productId: string) => {
 
-  const checkExistingItem = (cartState: CartItem[], item: CartItem) => {
+    console.log('checkExistingItem', cartItem, productId);
 
-    console.log('checkExistingItem', cartState, item);
-
-    const existingItem = cartState.find((cartItem) => cartItem.id === item.id);
+    const existingItem = cartItem.find((cartItem) => cartItem.id === productId);
     if (existingItem) {
       console.log('already in cart', existingItem);
-      return cartState.map((cartItem) =>
-        cartItem.id === item.id
+      return cartItem.map((cartItem) =>
+        cartItem.id === productId
       ? { ...cartItem, quantity: cartItem.quantity + 1 }
       : cartItem
     );
   } else {
       console.log('ne exist jammais on cart');
-      return [...cartState, item];
+      return createCartItem(product);
     }
   }
 
@@ -134,20 +130,21 @@ export function AddToCart({ product }: { product: Product }) {
         },
       },
     };
-    return  item;
+    return item;
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    const item: CartItem[] | CartItem = checkExistingItem(cartState, createCartItem(product)) || createCartItem(product);
+    const item: CartItem[] | CartItem = checkExistingItem(cartItem, product.id) || createCartItem(product);
 
     console.log('item', item);
 
     if (Array.isArray(item)) {
-      setCartState(item);
+      setCartItem(item);
     } else {
-      setCartState((prevState) => [...prevState, item]);
+      const newItem: CartItem[] = [...cartItem, item];
+      setCartItem(newItem);
     }
   }
 
