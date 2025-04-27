@@ -1,7 +1,7 @@
 'use client';
 
-import { mockCart } from "lib/mock";
-import { Cart, CartItem } from "lib/shopify/types";
+import { mockCart, mockProduct, mockProductHeadwear, mockProductShoes } from "lib/mock";
+import { Cart, CartItem, Product } from "lib/shopify/types";
 import React from "react";
 
 interface CartContextType {
@@ -9,11 +9,14 @@ interface CartContextType {
     setCart: (cart: Cart) => void;
     cartItem: CartItem[];
     setCartItem: (cartItem: CartItem[]) => void;
+    products: Product[];
 }
 
 const cartContext = React.createContext<CartContextType | undefined>(undefined);
 
 const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
+
+    const products: Product[] = [mockProduct, mockProductHeadwear, mockProductShoes];
 
     const [cart, setCart] = React.useState<Cart>(mockCart);
     const [cartItem, setCartItem] = React.useState<CartItem[]>([]);
@@ -46,7 +49,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
     }, [cart]);
     
     return (
-        <cartContext.Provider value={{ cart, setCart, cartItem, setCartItem }}>
+        <cartContext.Provider value={{ cart, setCart, cartItem, setCartItem, products }}>
             {children}
         </cartContext.Provider>
     )

@@ -1,7 +1,7 @@
 import Grid from 'components/grid';
 import ProductGridItems from 'components/layout/product-grid-items';
 import { defaultSort, sorting } from 'lib/constants';
-import { mockProduct } from 'lib/mock';
+import { mockProduct, mockProductHeadwear, mockProductShoes } from 'lib/mock';
 // import { getProducts } from 'lib/shopify';
 
 export const metadata = {
@@ -16,22 +16,30 @@ export default async function SearchPage(props: {
   const { sort, q: searchValue } = searchParams as { [key: string]: string };
   const { sortKey, reverse } = sorting.find((item) => item.slug === sort) || defaultSort;
 
-  const products = [mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct]; // Mock data for testing
-  const resultsText = products.length > 1 ? 'results' : 'result';
+  const products = [mockProduct, mockProductHeadwear, mockProductShoes]
+
+  const handleSearch = (value: string | undefined ) => {
+    // Handle search logic here, e.g., update state or make an API call
+    console.log('Search value:', value);
+    return products.filter((product) => product.title.toLowerCase().includes((value ?? '').toLowerCase()));
+  }
+
+  const product = handleSearch(searchValue); // Mock data for testing
+  const resultsText = product.length > 1 ? 'results' : 'result';
 
   return (
     <>
       {searchValue ? (
         <p className="mb-4">
-          {products.length === 0
+          {product.length === 0
             ? 'There are no products that match '
-            : `Showing ${products.length} ${resultsText} for `}
+            : `Showing ${product.length} ${resultsText} for `}
           <span className="font-bold">&quot;{searchValue}&quot;</span>
         </p>
       ) : null}
-      {products.length > 0 ? (
+      {product.length > 0 ? (
         <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <ProductGridItems products={products} />
+          <ProductGridItems products={product} />
         </Grid>
       ) : null}
     </>
