@@ -8,7 +8,7 @@ import { ProductProvider } from 'components/product/product-context';
 import { ProductDescription } from 'components/product/product-description';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
 // import { getProduct, getProductRecommendations } from 'lib/shopify';
-import { mockProduct } from 'lib/mock';
+import { mockProduct, mockProductHeadwear, mockProductShoes } from 'lib/mock';
 import { Image } from 'lib/shopify/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -18,7 +18,13 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const params = await props.params;
   // const product = await getProduct(params.handle);
-  const product = mockProduct;
+  const getProductsByHandle = (handle: string) => {
+    const products = [mockProduct, mockProductHeadwear, mockProductShoes];
+    return products.find((product) => product.handle === handle);
+  }
+  const product = getProductsByHandle(params.handle);
+
+  // console.log('product', product);
 
   if (!product) return notFound();
 
@@ -53,7 +59,12 @@ export async function generateMetadata(props: {
 
 export default async function ProductPage(props: { params: Promise<{ handle: string }> }) {
   const params = await props.params;
-  const product = mockProduct; // Mock data for testing
+  const getProductsByHandle = (handle: string) => {
+    const products = [mockProduct, mockProductHeadwear, mockProductShoes];
+    return products.find((product) => product.handle === handle);
+  }
+  const product = getProductsByHandle(params.handle);
+  
   // const product = await getProduct(params.handle);
 
   if (!product) return notFound();

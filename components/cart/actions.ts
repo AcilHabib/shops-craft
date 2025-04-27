@@ -19,6 +19,8 @@ export async function addItem(
   }
 
   try {
+    console.log('Adding item to cart', selectedVariantId);
+
     // await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     revalidateTag(TAGS.cart);
   } catch (e) {

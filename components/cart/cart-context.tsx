@@ -11,7 +11,8 @@ import React, {
   use,
   useContext,
   useMemo,
-  useOptimistic
+  useOptimistic,
+  useState
 } from 'react';
 
 type UpdateType = 'plus' | 'minus' | 'delete';
@@ -216,6 +217,8 @@ export function useCart() {
     cartReducer
   );
 
+  const [cartState, setCartState] = useState<CartItem[]>([]);
+
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
     updateOptimisticCart({
       type: 'UPDATE_ITEM',
@@ -229,10 +232,10 @@ export function useCart() {
 
   return useMemo(
     () => ({
-      cart: optimisticCart,
+      cart: cartState,
       updateCartItem,
-      addCartItem
+      addCartItem,
     }),
-    [optimisticCart]
+    [cartState]
   );
 }

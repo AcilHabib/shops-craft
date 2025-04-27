@@ -1,92 +1,25 @@
-import { Product, ShopifyCollection } from "./shopify/types";
+import { Cart, Product, ShopifyCollection } from "./shopify/types";
 
-// export const cart = {
-//     id: "gid://shopify/Cart/123456",
-//     checkoutUrl: "https://example.com/checkout/123456",
-//     cost: {
-//       subtotalAmount: {
-//         amount: "90.00",
-//         currencyCode: "USD",
-//       },
-//       totalAmount: {
-//         amount: "97.20",
-//         currencyCode: "USD",
-//       },
-//       totalTaxAmount: {
-//         amount: "7.20",
-//         currencyCode: "USD",
-//       },
-//     },
-//     totalQuantity: 3,
-//     lines: [
-//       {
-//         id: "gid://shopify/CartLine/1",
-//         quantity: 2,
-//         cost: {
-//           totalAmount: {
-//             amount: "60.00",
-//             currencyCode: "USD",
-//           },
-//         },
-//         merchandise: {
-//           id: "gid://shopify/ProductVariant/111",
-//           title: "T-Shirt - Large",
-//           selectedOptions: [
-//             {
-//               name: "Size",
-//               value: "Large",
-//             },
-//             {
-//               name: "Color",
-//               value: "Blue",
-//             },
-//           ],
-//           product: {
-//             id: "gid://shopify/Product/111",
-//             handle: "t-shirt",
-//             title: "Cool T-Shirt",
-//             featuredImage: {
-//               url: "https://example.com/images/tshirt.png",
-//               altText: "Blue T-Shirt",
-//               width: 800,
-//               height: 800,
-//             },
-//           },
-//         },
-//       },
-//       {
-//         id: "gid://shopify/CartLine/2",
-//         quantity: 1,
-//         cost: {
-//           totalAmount: {
-//             amount: "30.00",
-//             currencyCode: "USD",
-//           },
-//         },
-//         merchandise: {
-//           id: "gid://shopify/ProductVariant/222",
-//           title: "Cap - One Size",
-//           selectedOptions: [
-//             {
-//               name: "Color",
-//               value: "Black",
-//             },
-//           ],
-//           product: {
-//             id: "gid://shopify/Product/222",
-//             handle: "cap",
-//             title: "Cool Cap",
-//             featuredImage: {
-//               url: "https://example.com/images/cap.png",
-//               altText: "Black Cap",
-//               width: 600,
-//               height: 600,
-//             },
-//           },
-//         },
-//       },
-//     ],
-// };
+export const mockCart: Cart = {
+  id: "cart123",
+  checkoutUrl: "https://checkout.example.com/cart123",
+  cost: {
+    subtotalAmount: {
+      amount: "90.00",
+      currencyCode: "USD",
+    },
+    totalAmount: {
+      amount: "95.00",
+      currencyCode: "USD",
+    },
+    totalTaxAmount: {
+      amount: "5.00",
+      currencyCode: "USD",
+    },
+  },
+  totalQuantity: 3,
+  lines: [],
+};
 
 export const mockProduct: Product = {
   id: "gid://shopify/Product/98765",
