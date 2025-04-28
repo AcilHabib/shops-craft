@@ -1,6 +1,7 @@
 'use server';
 
 import { TAGS } from 'lib/constants';
+import { mockCart } from 'lib/mock';
 // import {
 //   addToCart,
 //   createCart,
@@ -9,6 +10,8 @@ import { TAGS } from 'lib/constants';
 //   updateCart
 // } from 'lib/shopify';
 import { revalidateTag } from 'next/cache';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export async function addItem(
   prevState: any,
@@ -96,11 +99,17 @@ export async function updateItemQuantity(
 }
 
 export async function redirectToCheckout() {
-  // let cart = await getCart();
-  // redirect(cart!.checkoutUrl);
+
+  // const { cart } = useMyCart();
+  const cart = mockCart; // await getCart();
+  redirect(cart!.checkoutUrl);
 }
 
+export const setCookies = async (key: string ,value: string) => {
+  (await cookies()).set(key, value);
+} 
+
 export async function createCartAndSetCookie() {
-  // let cart = await createCart();
-  // (await cookies()).set('cartId', cart.id!);
+  let cart = mockCart; // await createCart();
+  (await cookies()).set('cartId', cart.id!);
 }

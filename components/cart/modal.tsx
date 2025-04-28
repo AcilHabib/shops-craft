@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createCartAndSetCookie, redirectToCheckout } from './actions';
+import { createCartAndSetCookie, redirectToCheckout, setCookies } from './actions';
 import { useCart } from './cart-context';
 import { useMyCart } from './CartProvider';
 import { DeleteItemButton } from './delete-item-button';
@@ -30,9 +30,15 @@ export default function CartModal() {
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
+  // useEffect(() => {
+  //   setCookies('cartId', cart?.id || '');
+  // }, []);
+
   useEffect(() => {
     if (!cart) {
       createCartAndSetCookie();
+    } else {
+      setCookies('cartId', cart?.id || '');
     }
   }, [cart]);
 

@@ -2,7 +2,7 @@ import { Cart, Product, ShopifyCollection } from "./shopify/types";
 
 export const mockCart: Cart = {
   id: "cart123",
-  checkoutUrl: "https://checkout.example.com/cart123",
+  checkoutUrl: "https://dev-vercel-shop.myshopify.com/checkouts/cn/Z2NwLXVzLXdlc3QxOjAxSlNYM0g3Tkg3OFBOQ0NCUEdaTjNBODdD/information",
   cost: {
     subtotalAmount: {
       amount: "0.00",
