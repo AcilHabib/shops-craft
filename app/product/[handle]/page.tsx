@@ -8,7 +8,7 @@ import { ProductProvider } from 'components/product/product-context';
 import { ProductDescription } from 'components/product/product-description';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
 // import { getProduct, getProductRecommendations } from 'lib/shopify';
-import { mockProduct, mockProductHeadwear, mockProductShoes } from 'lib/mock';
+import { products } from 'lib/mock';
 import { Image } from 'lib/shopify/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -19,7 +19,6 @@ export async function generateMetadata(props: {
   const params = await props.params;
   // const product = await getProduct(params.handle);
   const getProductsByHandle = (handle: string) => {
-    const products = [mockProduct, mockProductHeadwear, mockProductShoes];
     return products.find((product) => product.handle === handle);
   }
   const product = getProductsByHandle(params.handle);
@@ -60,7 +59,7 @@ export async function generateMetadata(props: {
 export default async function ProductPage(props: { params: Promise<{ handle: string }> }) {
   const params = await props.params;
   const getProductsByHandle = (handle: string) => {
-    const products = [mockProduct, mockProductHeadwear, mockProductShoes];
+    // Mock data for testing
     return products.find((product) => product.handle === handle);
   }
   const product = getProductsByHandle(params.handle);
@@ -125,7 +124,7 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
 }
 
 async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = [mockProduct, mockProduct, mockProduct]; // Mock data for testing
+  const relatedProducts = products;// Mock data for testing
   // const relatedProducts = await getProductRecommendations(id);
 
   if (!relatedProducts.length) return null;

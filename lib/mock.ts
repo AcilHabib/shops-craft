@@ -21,6 +21,8 @@ export const mockCart: Cart = {
   lines: [],
 };
 
+
+
 export const mockProduct: Product = {
   id: "gid://shopify/Product/98765",
   handle: "shirt",
@@ -370,3 +372,5 @@ export const mockCollections: ShopifyCollection[] = [
   ShirtCollection,
   HeadWearCollection,
 ];
+
+export const products: Product[] = [mockProduct, mockProductHeadwear, mockProductShoes];

@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Grid from 'components/grid';
 import ProductGridItems from 'components/layout/product-grid-items';
 import { defaultSort, sorting } from 'lib/constants';
-import { mockProduct } from 'lib/mock';
+import { products } from 'lib/mock';
 import { ShopifyCollection } from 'lib/shopify/types';
 
 export async function generateMetadata(props: {
@@ -42,7 +42,6 @@ export default async function CategoryPage(props: {
   const { sort } = searchParams as { [key: string]: string };
   const { sortKey, reverse } = sorting.find((item) => item.slug === sort) || defaultSort;
   // const products = await getCollectionProducts({ collection: params.collection, sortKey, reverse });
-  const products = [mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct, mockProduct]; // Mock data for testing
   
   return (
     <section>
