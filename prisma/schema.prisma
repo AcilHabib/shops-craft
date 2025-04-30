@@ -29,18 +29,21 @@ model Product {
   tags             String[]
   updatedAt        DateTime         @updatedAt
   createdAt        DateTime         @default(now())
+
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
 }
 
 model Collection {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   handle      String
   title       String
   description String
   seo         SEO
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
   path        String
-  productIds  String[] // Simulated relation: list of Product IDs
+  product     Product[] // Simulated relation: list of Product IDs
 }
 
 model Cart {
