@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  // output = "../generated/client"fo
 }
 
 datasource db {
@@ -17,7 +16,7 @@ datasource db {
 model Product {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
   handle           String
-  availableForSale Boolean
+  availableForSale Boolean          @default(true)
   title            String
   description      String
   descriptionHtml  String
