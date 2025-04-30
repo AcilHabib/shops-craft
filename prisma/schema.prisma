@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output = "../generated/client"fo
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  handle           String
+  availableForSale Boolean
+  title            String
+  description      String
+  descriptionHtml  String
+  options          ProductOption[]
+  priceRange       PriceRange
+  variants         ProductVariant[]
+  featuredImage    Image
+  images           Image[]
+  seo              SEO
+  tags             String[]
+  updatedAt        DateTime         @updatedAt
+  createdAt        DateTime         @default(now())
+}
+
+model Collection {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  handle      String
+  title       String
+  description String
+  seo         SEO
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  path        String
+  productIds  String[] // Simulated relation: list of Product IDs
+}
+
+model Cart {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  checkoutUrl   String
+  cost          CartCost
+  lines         CartItem[] // Embedded items with product snapshot + ID
+  totalQuantity Int
+  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime   @default(now())
+}
+
+model ProductOption {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  values    String[]
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+type PriceRange {
+  maxVariantPrice Money
+  minVariantPrice Money
+}
+
+type Money {
+  amount       String
+  currencyCode String
+}
+
+model ProductVariant {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  availableForSale Boolean
+  selectedOptions  SelectedOption[]
+  price            Money
+  updatedAt        DateTime         @updatedAt
+  createdAt        DateTime         @default(now())
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+type SelectedOption {
+  name  String
+  value String
+}
+
+type Image {
+  url     String
+  altText String
+  width   Int
+  height  Int
+}
+
+type SEO {
+  title       String
+  description String
+}
+
+type CartCost {
+  subtotalAmount Money
+  totalAmount    Money
+  totalTaxAmount Money
+}
+
+model CartItem {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  quantity      Int
+  productId     String // Product reference
+  cost          CartItemCost
+  merchandiseId String?      @unique
+  merchandise   Merchandise? @relation(fields: [merchandiseId], references: [id])
+  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime     @default(now())
+
+  cartId String?
+  cart   Cart?   @relation(fields: [cartId], references: [id])
+}
+
+type CartItemCost {
+  totalAmount Money
+}
+
+model Merchandise {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  selectedOptions SelectedOption[]
+  product         CartProduct?
+  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime         @default(now())
+
+  cartItem CartItem?
+}
+
+model CartProduct {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  handle        String
+  title         String
+  featuredImage Image
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  MerchandiseId String?      @unique
+  merchandise   Merchandise? @relation(fields: [MerchandiseId], references: [id])
+}
