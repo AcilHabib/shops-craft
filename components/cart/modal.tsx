@@ -249,7 +249,7 @@ function CloseCart({ className }: { className?: string }) {
   );
 }
 
-function CheckoutButton() {
+export function CheckoutButton() {
   const { pending } = useFormStatus();
 
   return (
