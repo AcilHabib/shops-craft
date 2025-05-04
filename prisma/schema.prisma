@@ -14,22 +14,24 @@ datasource db {
 }
 
 model Product {
-  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
   handle           String
-  availableForSale Boolean          @default(true)
+  availableForSale Boolean    @default(true)
   title            String
   description      String
   descriptionHtml  String
-  options          ProductOption[]
-  priceRange       PriceRange
-  variants         ProductVariant[]
-  featuredImage    Image
-  images           Image[]
-  seo              SEO
   tags             String[]
-  updatedAt        DateTime         @updatedAt
-  createdAt        DateTime         @default(now())
+  priceRange       PriceRange
 
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  options  ProductOption[]
+  variants ProductVariant[]
+  images   Image[]
+  seo      SEO?
+
+  cartitem     CartItem?
   collectionId String?
   collection   Collection? @relation(fields: [collectionId], references: [id])
 }
@@ -39,27 +41,32 @@ model Collection {
   handle      String
   title       String
   description String
-  seo         SEO
+  path        String
+  
   updatedAt   DateTime  @updatedAt
   createdAt   DateTime  @default(now())
-  path        String
+  
+  seo         SEO?
   product     Product[] // Simulated relation: list of Product IDs
 }
 
 model Cart {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   checkoutUrl   String
-  cost          CartCost
-  lines         CartItem[] // Embedded items with product snapshot + ID
   totalQuantity Int
+  cost          CartCost
+  
   updatedAt     DateTime   @updatedAt
   createdAt     DateTime   @default(now())
+  
+  lines         CartItem[] // Embedded items with product snapshot + ID
 }
 
 model ProductOption {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  values    String[]
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  values String[]
+
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
@@ -67,9 +74,100 @@ model ProductOption {
   product   Product? @relation(fields: [productId], references: [id])
 }
 
-type PriceRange {
-  maxVariantPrice Money
-  minVariantPrice Money
+model ProductVariant {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  availableForSale Boolean
+  price            Money
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  selectedOptions SelectedOption[]
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+model SelectedOption {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  value String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  merchandiseId    String?
+  merchandise      Merchandise?    @relation(fields: [merchandiseId], references: [id])
+  productVariantId String?
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+}
+
+model Image {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  altText   String
+  width     Int
+  height    Int
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+model SEO {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId    String?     @unique
+  product      Product?    @relation(fields: [productId], references: [id])
+  collectionId String?     @unique
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+}
+
+model CartItem {
+  id       String       @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int
+  cost     CartItemCost
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  merchandise Merchandise[]
+
+  productId String   @unique
+  product   Product? @relation(fields: [productId], references: [id])
+  cartId    String?
+  cart      Cart?    @relation(fields: [cartId], references: [id])
+}
+
+model Merchandise {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  selectedOptions SelectedOption[]
+  product         CartProduct[]
+  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime         @default(now())
+
+  cartItemId String?
+  cartItem   CartItem? @relation(fields: [cartItemId], references: [id])
+}
+
+model CartProduct {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  handle String
+  title  String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  MerchandiseId String?
+  merchandise   Merchandise? @relation(fields: [MerchandiseId], references: [id])
 }
 
 type Money {
@@ -77,34 +175,8 @@ type Money {
   currencyCode String
 }
 
-model ProductVariant {
-  id               String           @id @default(auto()) @map("_id") @db.ObjectId
-  title            String
-  availableForSale Boolean
-  selectedOptions  SelectedOption[]
-  price            Money
-  updatedAt        DateTime         @updatedAt
-  createdAt        DateTime         @default(now())
-
-  productId String?
-  product   Product? @relation(fields: [productId], references: [id])
-}
-
-type SelectedOption {
-  name  String
-  value String
-}
-
-type Image {
-  url     String
-  altText String
-  width   Int
-  height  Int
-}
-
-type SEO {
-  title       String
-  description String
+type CartItemCost {
+  totalAmount Money
 }
 
 type CartCost {
@@ -113,43 +185,7 @@ type CartCost {
   totalTaxAmount Money
 }
 
-model CartItem {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
-  quantity      Int
-  productId     String // Product reference
-  cost          CartItemCost
-  merchandiseId String?      @unique
-  merchandise   Merchandise? @relation(fields: [merchandiseId], references: [id])
-  updatedAt     DateTime     @updatedAt
-  createdAt     DateTime     @default(now())
-
-  cartId String?
-  cart   Cart?   @relation(fields: [cartId], references: [id])
-}
-
-type CartItemCost {
-  totalAmount Money
-}
-
-model Merchandise {
-  id              String           @id @default(auto()) @map("_id") @db.ObjectId
-  title           String
-  selectedOptions SelectedOption[]
-  product         CartProduct?
-  updatedAt       DateTime         @updatedAt
-  createdAt       DateTime         @default(now())
-
-  cartItem CartItem?
-}
-
-model CartProduct {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  handle        String
-  title         String
-  featuredImage Image
-  updatedAt     DateTime @updatedAt
-  createdAt     DateTime @default(now())
-
-  MerchandiseId String?      @unique
-  merchandise   Merchandise? @relation(fields: [MerchandiseId], references: [id])
+type PriceRange {
+  maxVariantPrice Money
+  minVariantPrice Money
 }
