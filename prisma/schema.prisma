@@ -94,6 +94,25 @@ model Order{
     updatedAt DateTime @updatedAt
     createdAt DateTime @default(now())
     order Order[]
+    address Address[]
+  }
+
+
+
+  model Address {
+    id String @id @default (auto()) @map("_id") @db.ObjectId
+    state String 
+    city String 
+    address String 
+    appartment String?
+    zipCode String
+
+    customerId String ? @unique @db.ObjectId
+    customer Customer? @relation (fields: [customerId], references: [id])
+
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now()) 
+
   }
 
   
