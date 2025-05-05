@@ -15,8 +15,12 @@ export const GET = async () => {
     try {
         const products = await prisma.product.findMany({
             include: {
+                cartitem: true,
+                collection: true,
                 options: true,
+                images: true,
                 variants: true,
+                seo: true,
             }
         })
 
@@ -36,9 +40,11 @@ export const GET = async () => {
 
 export const POST = async (request: ProductId) => {
 
-    const { handle, title, description, descriptionHtml, options, priceRange, variants, featuredImage, images, seo, tags } = await request.json();
+    const collectionId = request.nextUrl.searchParams.get("collectionId");
 
-    if ( !description || !descriptionHtml || !handle || !title || !priceRange || !options || !variants || !featuredImage || !images || !seo || !tags) {
+    const { handle, title, description, descriptionHtml, priceRange, tags } = await request.json();
+
+    if ( !description || !descriptionHtml || !handle || !title || !priceRange || !tags) {
         return NextResponse.json({ message: "All Fields are Required!!" }, { status: 400 });
     }
 
@@ -50,13 +56,13 @@ export const POST = async (request: ProductId) => {
                 title: title,
                 description: description,
                 descriptionHtml: descriptionHtml,
-                options: options,
                 priceRange: priceRange,
-                variants: variants,
-                featuredImage: featuredImage,
-                images: images,
-                seo: seo,
-                tags: tags
+                tags: tags,
+                collection: collectionId ? {
+                    connect: {
+                        id: collectionId,
+                    }
+                } : undefined,
             }
         })
 
@@ -94,8 +100,12 @@ export const PUT = async (req: ProductId) => {
                 availableForSale: availableForSale || undefined,
             },
             include: {
+                cartitem: true,
+                collection: true,
+                images: true,
                 options: true,
                 variants: true,
+                seo: true,
             }
         })
 
@@ -128,8 +138,12 @@ export const DELETE = async (req: ProductId) => {
                 id: id,
             },
             include: {
+                cartitem: true,
+                collection: true,
+                images: true,
                 options: true,
                 variants: true,
+                seo: true,
             }
         })
 

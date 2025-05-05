@@ -24,8 +24,12 @@ export const GET = async (request: CollectionId) => {
                 collectionId: id,
             },
             include: {
+                cartitem: true,
+                collection: true,
+                images: true,
                 options: true,
                 variants: true,
+                seo: true,
             }
         })
 

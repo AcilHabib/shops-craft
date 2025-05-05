@@ -24,8 +24,12 @@ export const GET = async (request: ProductId) => {
                 id: id,
             },
             include: {
+                cartitem: true,
+                collection: true,
+                images: true,
                 options: true,
                 variants: true,
+                seo: true,
             }
         })
 

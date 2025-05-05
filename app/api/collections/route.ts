@@ -15,6 +15,7 @@ export const GET = async () => {
     try {
         const collections = await prisma.collection.findMany({
             include: {
+                seo: true,
                 product: true,
             }
         })
@@ -35,9 +36,9 @@ export const GET = async () => {
 
 export const POST = async (request: CollectionId) => {
 
-    const { handle, title, description, seo, path } = await request.json();
+    const { handle, title, description, path } = await request.json();
 
-    if ( !description || !handle || !title || !seo || !path) {
+    if ( !description || !handle || !title || !path) {
         return NextResponse.json({ message: "All Fields are Required!!" }, { status: 400 });
     }
 
@@ -48,7 +49,6 @@ export const POST = async (request: CollectionId) => {
                 handle: handle,
                 title: title,
                 description: description,
-                seo: seo,
                 path: path,
             }
         })
@@ -71,7 +71,7 @@ export const PUT = async (req: CollectionId) => {
 
     const id = req.nextUrl.searchParams.get("id");
 
-    const { handle, title, description, seo, path } = await req.json();
+    const { handle, title, description, path } = await req.json();
 
     if (!id) {
         return NextResponse.json({ message: "ID is Required!!" }, { status: 400 });
@@ -87,9 +87,10 @@ export const PUT = async (req: CollectionId) => {
                 handle: handle || undefined,
                 title: title || undefined,
                 description: description || undefined,
-                seo: seo || undefined,
+                path: path || undefined,
             },
             include: {
+                seo: true,
                 product: true,
             },
         })
@@ -123,6 +124,7 @@ export const DELETE = async (req: CollectionId) => {
                 id: id,
             },
             include: {
+                seo: true,
                 product: true,
 
             }

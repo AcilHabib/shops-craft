@@ -39,21 +39,21 @@ model Product {
 }
 
 model Collection {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
   handle      String
   title       String
   description String
   path        String
-  
-  updatedAt   DateTime  @updatedAt
-  createdAt   DateTime  @default(now())
-  
-  seo         SEO?
-  product     Product[] // Simulated relation: list of Product IDs
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  seo     SEO?
+  product Product[] // Simulated relation: list of Product IDs
 }
 
 model Cart {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   checkoutUrl   String
   totalQuantity Int
   cost          CartCost
@@ -132,7 +132,7 @@ model ProductOption {
 model ProductVariant {
   id               String  @id @default(auto()) @map("_id") @db.ObjectId
   title            String
-  availableForSale Boolean
+  availableForSale Boolean @default(true)
   price            Money
 
   updatedAt DateTime @updatedAt
@@ -204,10 +204,12 @@ model CartItem {
 model Merchandise {
   id              String           @id @default(auto()) @map("_id") @db.ObjectId
   title           String
-  selectedOptions SelectedOption[]
-  product         CartProduct[]
+  
   updatedAt       DateTime         @updatedAt
   createdAt       DateTime         @default(now())
+
+  product         CartProduct[]
+  selectedOptions SelectedOption[]
 
   cartItemId String?
   cartItem   CartItem? @relation(fields: [cartItemId], references: [id])
