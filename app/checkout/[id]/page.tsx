@@ -1,26 +1,48 @@
-"use client"
+"use client";
 
-import { useCart } from "components/cart/cart-context"
-import { useMyCart } from "components/cart/CartProvider"
-import { DeleteItemButton } from "components/cart/delete-item-button"
-import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button"
-import Price from "components/price"
-import { DEFAULT_OPTION } from "lib/constants"
-import { createUrl } from "lib/utils"
-import { ArrowLeft, ChevronDown, ChevronRight, CreditCard, Info, Search, ShoppingCartIcon } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
+import { useCart } from "components/cart/cart-context";
+import { useMyCart } from "components/cart/CartProvider";
+import { DeleteItemButton } from "components/cart/delete-item-button";
+import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
+import Price from "components/price";
+import { DEFAULT_OPTION } from "lib/constants";
+import { createUrl } from "lib/utils";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  CreditCard,
+  Info,
+  Search,
+  ShoppingCartIcon,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function CheckoutPage() {
-  const [currentStep, setCurrentStep] = useState("information") // information, shipping, payment
+  const [currentStep, setCurrentStep] = useState("information"); // information, shipping, payment
   const { cart } = useMyCart();
   const { updateCartItem } = useCart();
+
+  async function handleCheckout(formData: FormData) {
+    "use server";
+    const email = formData.get("email");
+    const firstName = formData.get("firstName");
+    const lastName = formData.get("lastName");
+    const country = formData.get("country") as string | null;
+    const address = formData.get("address");
+
+    console.log("email", email);
+    console.log("firstName", firstName);
+    console.log("lastName", lastName);
+    console.log("country", country);
+    console.log("address", address);
+  }
 
   type MerchandiseSearchParams = {
     [key: string]: string;
   };
-  
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -29,7 +51,11 @@ export default function CheckoutPage() {
         <div className="p-6 border-b border-gray-800">
           <Link href="/">
             <div className="w-8 h-8">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" />
                 <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" />
                 <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" />
@@ -72,7 +98,10 @@ export default function CheckoutPage() {
                 <div className="mb-8">
                   <h2 className="text-2xl font-bold mb-4">Contact</h2>
                   <div className="mb-4">
-                    <label htmlFor="email" className="block text-sm text-gray-400 mb-1">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm text-gray-400 mb-1"
+                    >
                       Email or mobile phone number
                     </label>
                     <input
@@ -83,9 +112,13 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="flex items-center mb-4">
-                    <input type="checkbox" id="newsletter" className="h-4 w-4 border-gray-700 rounded bg-black" />
+                    <input
+                      type="checkbox"
+                      id="newsletter"
+                      className="h-4 w-4 border-gray-700 rounded bg-black"
+                    />
                     <label htmlFor="newsletter" className="ml-2 text-sm">
-                      Email me with news and offers
+                      {/* Email me with news and offers */}
                     </label>
                   </div>
                 </div>
@@ -94,7 +127,10 @@ export default function CheckoutPage() {
                   <h2 className="text-2xl font-bold mb-4">Shipping address</h2>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="country" className="block text-sm text-gray-400 mb-1">
+                      <label
+                        htmlFor="country"
+                        className="block text-sm text-gray-400 mb-1"
+                      >
                         Country/Region
                       </label>
                       <div className="relative">
@@ -113,7 +149,10 @@ export default function CheckoutPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="firstName" className="block text-sm text-gray-400 mb-1">
+                        <label
+                          htmlFor="firstName"
+                          className="block text-sm text-gray-400 mb-1"
+                        >
                           First name (optional)
                         </label>
                         <input
@@ -124,7 +163,10 @@ export default function CheckoutPage() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="lastName" className="block text-sm text-gray-400 mb-1">
+                        <label
+                          htmlFor="lastName"
+                          className="block text-sm text-gray-400 mb-1"
+                        >
                           Last name
                         </label>
                         <input
@@ -137,7 +179,10 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="address" className="block text-sm text-gray-400 mb-1">
+                      <label
+                        htmlFor="address"
+                        className="block text-sm text-gray-400 mb-1"
+                      >
                         Address
                       </label>
                       <div className="relative">
@@ -157,7 +202,10 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="apartment" className="block text-sm text-gray-400 mb-1">
+                      <label
+                        htmlFor="apartment"
+                        className="block text-sm text-gray-400 mb-1"
+                      >
                         Apartment, suite, etc. (optional)
                       </label>
                       <input
@@ -168,7 +216,10 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="city" className="block text-sm text-gray-400 mb-1">
+                      <label
+                        htmlFor="city"
+                        className="block text-sm text-gray-400 mb-1"
+                      >
                         City
                       </label>
                       <input
@@ -181,7 +232,10 @@ export default function CheckoutPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="state" className="block text-sm text-gray-400 mb-1">
+                        <label
+                          htmlFor="state"
+                          className="block text-sm text-gray-400 mb-1"
+                        >
                           State
                         </label>
                         <div className="relative">
@@ -198,7 +252,10 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="zip" className="block text-sm text-gray-400 mb-1">
+                        <label
+                          htmlFor="zip"
+                          className="block text-sm text-gray-400 mb-1"
+                        >
                           ZIP code
                         </label>
                         <input
@@ -211,7 +268,11 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className="flex items-center">
-                      <input type="checkbox" id="saveInfo" className="h-4 w-4 border-gray-700 rounded bg-black" />
+                      <input
+                        type="checkbox"
+                        id="saveInfo"
+                        className="h-4 w-4 border-gray-700 rounded bg-black"
+                      />
                       <label htmlFor="saveInfo" className="ml-2 text-sm">
                         Save this information for next time
                       </label>
@@ -219,7 +280,48 @@ export default function CheckoutPage() {
 
                     <button
                       className="w-full bg-blue-600 text-white py-4 px-6 rounded font-medium hover:bg-blue-700 transition-colors"
-                      onClick={() => setCurrentStep("shipping")}
+                      onClick={() => {
+                        const formData = new FormData();
+                        formData.append(
+                          "email",
+                          (document.getElementById("email") as HTMLInputElement)
+                            .value
+                        );
+                        formData.append(
+                          "firstName",
+                          (
+                            document.getElementById(
+                              "firstName"
+                            ) as HTMLInputElement
+                          ).value
+                        );
+                        formData.append(
+                          "lastName",
+                          (
+                            document.getElementById(
+                              "lastName"
+                            ) as HTMLInputElement
+                          ).value
+                        );
+                        formData.append(
+                          "country",
+                          (
+                            document.getElementById(
+                              "country"
+                            ) as HTMLSelectElement
+                          ).value
+                        );
+                        formData.append(
+                          "address",
+                          (
+                            document.getElementById(
+                              "address"
+                            ) as HTMLInputElement
+                          ).value
+                        );
+                        setCurrentStep("shipping");
+                        handleCheckout(formData);
+                      }}
                     >
                       Continue to shipping
                     </button>
@@ -238,7 +340,9 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm">sido@gmail.com</span>
-                        <button className="ml-4 text-blue-500 text-sm">Change</button>
+                        <button className="ml-4 text-blue-500 text-sm">
+                          Change
+                        </button>
                       </div>
                     </div>
                     <div className="flex justify-between items-center p-4">
@@ -246,8 +350,12 @@ export default function CheckoutPage() {
                         <span className="text-gray-400">Ship to</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="text-sm">tenes, Los Angeles CA 90001, United States</span>
-                        <button className="ml-4 text-blue-500 text-sm">Change</button>
+                        <span className="text-sm">
+                          tenes, Los Angeles CA 90001, United States
+                        </span>
+                        <button className="ml-4 text-blue-500 text-sm">
+                          Change
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -266,7 +374,9 @@ export default function CheckoutPage() {
                           />
                           <div className="ml-3">
                             <span className="block">Economy</span>
-                            <span className="block text-sm text-gray-400">5 to 8 business days</span>
+                            <span className="block text-sm text-gray-400">
+                              5 to 8 business days
+                            </span>
                           </div>
                         </div>
                         <span className="font-medium">$4.90</span>
@@ -281,7 +391,9 @@ export default function CheckoutPage() {
                           />
                           <div className="ml-3">
                             <span className="block">Standard</span>
-                            <span className="block text-sm text-gray-400">3 to 4 business days</span>
+                            <span className="block text-sm text-gray-400">
+                              3 to 4 business days
+                            </span>
                           </div>
                         </div>
                         <span className="font-medium">$9.90</span>
@@ -289,7 +401,10 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className="flex justify-between mt-8">
-                      <button className="flex items-center text-blue-500" onClick={() => setCurrentStep("information")}>
+                      <button
+                        className="flex items-center text-blue-500"
+                        onClick={() => setCurrentStep("information")}
+                      >
                         <ArrowLeft className="w-4 h-4 mr-1" />
                         Return to information
                       </button>
@@ -315,7 +430,9 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm">sido@gmail.com</span>
-                        <button className="ml-4 text-blue-500 text-sm">Change</button>
+                        <button className="ml-4 text-blue-500 text-sm">
+                          Change
+                        </button>
                       </div>
                     </div>
                     <div className="flex justify-between items-center p-4 border-b border-gray-800">
@@ -323,8 +440,12 @@ export default function CheckoutPage() {
                         <span className="text-gray-400">Ship to</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="text-sm">tenes, Los Angeles CA 90001, United States</span>
-                        <button className="ml-4 text-blue-500 text-sm">Change</button>
+                        <span className="text-sm">
+                          tenes, Los Angeles CA 90001, United States
+                        </span>
+                        <button className="ml-4 text-blue-500 text-sm">
+                          Change
+                        </button>
                       </div>
                     </div>
                     <div className="flex justify-between items-center p-4">
@@ -333,23 +454,32 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex items-center">
                         <span className="text-sm">Economy · $4.90</span>
-                        <button className="ml-4 text-blue-500 text-sm">Change</button>
+                        <button className="ml-4 text-blue-500 text-sm">
+                          Change
+                        </button>
                       </div>
                     </div>
                   </div>
 
                   <h2 className="text-2xl font-bold mb-4">Payment</h2>
-                  <p className="text-sm text-gray-400 mb-4">All transactions are secure and encrypted.</p>
+                  <p className="text-sm text-gray-400 mb-4">
+                    All transactions are secure and encrypted.
+                  </p>
 
                   <div className="bg-gray-900 rounded-lg p-8 mb-6 flex flex-col items-center justify-center text-center">
                     <div className="mb-4 bg-gray-800 p-4 rounded-full">
                       <CreditCard className="w-8 h-8 text-gray-400" />
                     </div>
-                    <p className="text-gray-300">This store can't accept payments right now.</p>
+                    <p className="text-gray-300">
+                      This store can't accept payments right now.
+                    </p>
                   </div>
 
                   <div className="flex justify-between mt-8">
-                    <button className="flex items-center text-blue-500" onClick={() => setCurrentStep("shipping")}>
+                    <button
+                      className="flex items-center text-blue-500"
+                      onClick={() => setCurrentStep("shipping")}
+                    >
                       <ArrowLeft className="w-4 h-4 mr-1" />
                       Return to shipping
                     </button>
@@ -364,146 +494,139 @@ export default function CheckoutPage() {
 
           {/* Right side - Order summary */}
           {!cart || cart.lines.length === 0 ? (
-                <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
-                <ShoppingCartIcon className="h-16" />
-                <p className="mt-6 text-center text-2xl font-bold">
-                    Your cart is empty.
-                </p>
-                </div>
-            ) : (
+            <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
+              <ShoppingCartIcon className="h-16" />
+              <p className="mt-6 text-center text-2xl font-bold">
+                Your cart is empty.
+              </p>
+            </div>
+          ) : (
             <div className="flex h-full flex-col justify-between overflow-hidden p-1">
-                <ul className="grow overflow-auto py-4">
-                    {cart?.lines
-                        .sort((a, b) =>
-                        a.merchandise.product.title.localeCompare(
-                            b.merchandise.product.title
-                        )
-                        )
-                        .map((item, i) => {
-                        const merchandiseSearchParams =
-                            {} as MerchandiseSearchParams;
+              <ul className="grow overflow-auto py-4">
+                {cart?.lines
+                  .sort((a, b) =>
+                    a.merchandise.product.title.localeCompare(
+                      b.merchandise.product.title
+                    )
+                  )
+                  .map((item, i) => {
+                    const merchandiseSearchParams =
+                      {} as MerchandiseSearchParams;
 
-                        item.merchandise.selectedOptions.forEach(
-                            ({ name, value }) => {
-                            if (value !== DEFAULT_OPTION) {
-                                merchandiseSearchParams[name.toLowerCase()] =
-                                value;
-                            }
-                            }
-                        );
+                    item.merchandise.selectedOptions.forEach(
+                      ({ name, value }) => {
+                        if (value !== DEFAULT_OPTION) {
+                          merchandiseSearchParams[name.toLowerCase()] = value;
+                        }
+                      }
+                    );
 
-                        const merchandiseUrl = createUrl(
-                            `/product/${item.merchandise.product.handle}`,
-                            new URLSearchParams(merchandiseSearchParams)
-                        );
+                    const merchandiseUrl = createUrl(
+                      `/product/${item.merchandise.product.handle}`,
+                      new URLSearchParams(merchandiseSearchParams)
+                    );
 
-                        return (
-                            <li
-                            key={i}
-                            className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
-                            >
-                            <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                                <div className="absolute z-40 -ml-1 -mt-2">
-                                <DeleteItemButton
-                                    item={item}
-                                    optimisticUpdate={updateCartItem}
-                                />
-                                </div>
-                                <div className="flex flex-row">
-                                <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                    <Image
-                                    className="h-full w-full object-cover"
-                                    width={64}
-                                    height={64}
-                                    alt={
-                                        item.merchandise.product.featuredImage
-                                        .altText ||
-                                        item.merchandise.product.title
-                                    }
-                                    src={
-                                        item.merchandise.product.featuredImage.url
-                                    }
-                                    />
-                                </div>
-                                <Link
-                                    href={merchandiseUrl}
-                                    className="z-30 ml-2 flex flex-row space-x-4"
-                                >
-                                    <div className="flex flex-1 flex-col text-base">
-                                    <span className="leading-tight">
-                                        {item.merchandise.product.title}
-                                    </span>
-                                    {item.merchandise.title !==
-                                    DEFAULT_OPTION ? (
-                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {item.merchandise.title}
-                                        </p>
-                                    ) : null}
-                                    </div>
-                                </Link>
-                                </div>
-                                <div className="flex h-16 flex-col justify-between">
-                                <Price
-                                    className="flex justify-end space-y-2 text-right text-sm"
-                                    amount={item.cost.totalAmount.amount}
-                                    currencyCode={
-                                    item.cost.totalAmount.currencyCode
-                                    }
-                                />
-                                <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-                                    <EditItemQuantityButton
-                                    item={item}
-                                    type="minus"
-                                    optimisticUpdate={updateCartItem}
-                                    />
-                                    <p className="w-6 text-center">
-                                    <span className="w-full text-sm">
-                                        {item.quantity}
-                                    </span>
-                                    </p>
-                                    <EditItemQuantityButton
-                                    item={item}
-                                    type="plus"
-                                    optimisticUpdate={updateCartItem}
-                                    />
-                                </div>
-                                </div>
+                    return (
+                      <li
+                        key={i}
+                        className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
+                      >
+                        <div className="relative flex w-full flex-row justify-between px-1 py-4">
+                          <div className="absolute z-40 -ml-1 -mt-2">
+                            <DeleteItemButton
+                              item={item}
+                              optimisticUpdate={updateCartItem}
+                            />
+                          </div>
+                          <div className="flex flex-row">
+                            <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                              <Image
+                                className="h-full w-full object-cover"
+                                width={64}
+                                height={64}
+                                alt={
+                                  item.merchandise.product.featuredImage
+                                    .altText || item.merchandise.product.title
+                                }
+                                src={item.merchandise.product.featuredImage.url}
+                              />
                             </div>
-                            </li>
-                        );
-                        })}
-                    </ul>
-                    <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
-                        <p>Taxes</p>
-                        <Price
-                        className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalTaxAmount.amount}
-                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                        />
-                    </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                        <p>Shipping</p>
-                        <p className="text-right">Calculated at checkout</p>
-                    </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                        <p>Total</p>
-                        <Price
-                        className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                        />
-                    </div>
-                    </div>
+                            <Link
+                              href={merchandiseUrl}
+                              className="z-30 ml-2 flex flex-row space-x-4"
+                            >
+                              <div className="flex flex-1 flex-col text-base">
+                                <span className="leading-tight">
+                                  {item.merchandise.product.title}
+                                </span>
+                                {item.merchandise.title !== DEFAULT_OPTION ? (
+                                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    {item.merchandise.title}
+                                  </p>
+                                ) : null}
+                              </div>
+                            </Link>
+                          </div>
+                          <div className="flex h-16 flex-col justify-between">
+                            <Price
+                              className="flex justify-end space-y-2 text-right text-sm"
+                              amount={item.cost.totalAmount.amount}
+                              currencyCode={item.cost.totalAmount.currencyCode}
+                            />
+                            <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
+                              <EditItemQuantityButton
+                                item={item}
+                                type="minus"
+                                optimisticUpdate={updateCartItem}
+                              />
+                              <p className="w-6 text-center">
+                                <span className="w-full text-sm">
+                                  {item.quantity}
+                                </span>
+                              </p>
+                              <EditItemQuantityButton
+                                item={item}
+                                type="plus"
+                                optimisticUpdate={updateCartItem}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+              </ul>
+              <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
+                  <p>Taxes</p>
+                  <Price
+                    className="text-right text-base text-black dark:text-white"
+                    amount={cart.cost.totalTaxAmount.amount}
+                    currencyCode={cart.cost.totalTaxAmount.currencyCode}
+                  />
                 </div>
-            )}
+                <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
+                  <p>Shipping</p>
+                  <p className="text-right">Calculated at checkout</p>
+                </div>
+                <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
+                  <p>Total</p>
+                  <Price
+                    className="text-right text-base text-black dark:text-white"
+                    amount={cart.cost.totalAmount.amount}
+                    currencyCode={cart.cost.totalAmount.currencyCode}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-800 text-sm text-gray-500">
-          <p>All rights reserved Dev Vercel Shop</p>
+          {/* Footer */}
+          <div className="p-6 border-t border-gray-800 text-sm text-gray-500">
+            <p>All rights reserved Dev Vercel Shop</p>
+          </div>
         </div>
       </div>
     </div>
-    </div>
-  )
+  );
 }
