@@ -40,7 +40,7 @@ export const POST = async (request: ProductId) => {
 
     const { title, price, availableForSale } = await request.json();
 
-    if ( title || price || !id) {
+    if ( !title || !price || !id) {
         return NextResponse.json({ message: "All Fields are Required!!" }, { status: 400 });
     }
 

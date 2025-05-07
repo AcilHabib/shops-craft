@@ -24,9 +24,6 @@ export const GET = async (request: PictureId) => {
             where: {
                 productId: productId,
             },
-            include: {
-                product: true,
-            }
         })
 
         if (!pictures) {
@@ -87,7 +84,7 @@ export const PUT = async (req: PictureId) => {
 
     const id = req.nextUrl.searchParams.get("id");
 
-    const { url, altText, width, height } = await req.json();
+    const { url, altText, width, height, isMain } = await req.json();
 
     if (!id) {
         return NextResponse.json({ message: "ID is Required!!" }, { status: 400 });
@@ -104,6 +101,7 @@ export const PUT = async (req: PictureId) => {
                 altText: altText || undefined,
                 width: width || undefined,
                 height: height || undefined,
+                isFeatured: isMain ? true : false || undefined,
             },
             include: {
                 product: true

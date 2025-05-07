@@ -39,9 +39,9 @@ export const POST = async (request: OptiontId) => {
     const variantId = request.nextUrl.searchParams.get("variantId");
     const merchandiseId = request.nextUrl.searchParams.get("merchandiseId");
 
-    const { name, values } = await request.json();
+    const { name, value } = await request.json();
 
-    if ( !name || !values || !variantId || !merchandiseId) {
+    if ( !name || !value || !variantId ) {
         return NextResponse.json({ message: "All Fields are Required!!" }, { status: 400 });
     }
 
@@ -50,17 +50,17 @@ export const POST = async (request: OptiontId) => {
         const selectedOption = await prisma.selectedOption.create({
             data: {
                 name: name,
-                value: values,
+                value: value,
                 productVariant: {
                     connect: {
                         id: variantId,
                     }
                 },
-                merchandise: {
+                merchandise: merchandiseId ? {
                     connect: {
                         id: merchandiseId,
                     }
-                }
+                } : undefined,
             }
         })
 

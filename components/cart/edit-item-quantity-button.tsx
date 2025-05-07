@@ -40,39 +40,11 @@ export function EditItemQuantityButton({
   optimisticUpdate: any;
 }) {
   const [message, formAction] = useActionState(updateItemQuantity, null);
-  // const payload = {
-  //   merchandiseId: item.merchandise.id,
-  //   quantity: type === 'plus' ? item.quantity + 1 : item.quantity - 1
-  // };
-  // const updateItemQuantityAction = formAction.bind(null, payload);
-
-  const { cartItem, setCartItem } = useMyCart();
-
-  const handleUpdateItemQuantity = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    const updatedCart = cartItem.map((cartItem) => {
-      if (cartItem.id === item.id) {
-        return {
-          ...cartItem,
-          quantity: type === 'plus' ? cartItem.quantity + 1 : cartItem.quantity - 1
-        };
-      }
-      
-      return cartItem;
-    });
-
-    setCartItem(updatedCart);
-  }
+  const { handleUpdateItemQuantity } = useMyCart();
 
   return (
     <form
-      // action={async () => {
-      //   optimisticUpdate(payload.merchandiseId, type);
-      //   updateItemQuantityAction();
-      // }}
-
-      onSubmit={handleUpdateItemQuantity}
+      onSubmit={(e) => {handleUpdateItemQuantity(e, item, type)}}
     >
       <SubmitButton type={type} />
       <p aria-live="polite" className="sr-only" role="status">

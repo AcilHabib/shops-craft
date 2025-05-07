@@ -10,13 +10,19 @@ type ProductId = NextRequest & {
     }
 }
 
-export const GET = async () => {
+export const GET = async (request: ProductId) => {
+
+    const id = request.nextUrl.searchParams.get("id");
+
+    if (!id) {
+        return NextResponse.json({ message: "ID is Required!!" }, { status: 400 });
+    }
 
     try {
         const productOptions = await prisma.productOption.findMany({
-            include: {
-                product: true,
-            }
+            where: {
+                productId: id,
+            },
         })
 
         if (!productOptions) {

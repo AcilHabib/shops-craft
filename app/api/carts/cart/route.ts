@@ -24,7 +24,17 @@ export const GET = async (request: CartId) => {
                 id: cartId,
             },
             include: {
-                lines: true,
+                lines: {
+                    include: {
+                        merchandise: {
+                            include: {
+                                product: true,
+                                selectedOptions: true,
+                                cartItem: true,
+                            }
+                        }
+                    }
+                },
             }
         })
 

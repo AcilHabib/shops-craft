@@ -1,5 +1,6 @@
 import { GridTileImage } from 'components/grid/tile';
 import { mockProduct, mockProductHeadwear, mockProductShoes } from 'lib/mock';
+import { getProducts } from 'lib/shopify';
 // import { getCollectionProducts } from 'lib/shopify';
 import type { Product } from 'lib/shopify/types';
 import Link from 'next/link';
@@ -43,27 +44,17 @@ function ThreeItemGridItem({
 }
 
 export async function ThreeItemGrid() {
-  // Collections that start with `hidden-*` are hidden from the search page.
-  // const homepageItems = await getCollectionProducts({
-  //   collection: 'hidden-homepage-featured-items'
-  // });
+  const products = await getProducts({query: '', reverse: true, sortKey: 'RELEVANT'});
 
-  // if (!homepageItems[0] || !homepageItems[1] || !homepageItems[2]) return null;
-
-  // const [firstProduct, secondProduct, thirdProduct] = homepageItems;
-
-
-  // const product = {
-  //   variants: [],
-  //   images: []
-  // }
-  
+  const firstProduct = products[0] || mockProduct;
+  const secondProduct = products[1] || mockProductHeadwear;
+  const thirdProduct = products[2] || mockProductShoes;
 
   return (
     <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[calc(100vh-200px)]">
-      <ThreeItemGridItem size="full" item={mockProduct} priority={true} />
-      <ThreeItemGridItem size="half" item={mockProductHeadwear} priority={true} />
-      <ThreeItemGridItem size="half" item={mockProductShoes} />
+      <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
+      <ThreeItemGridItem size="half" item={secondProduct} priority={true} />
+      <ThreeItemGridItem size="half" item={thirdProduct} />
     </section>
   );
 }

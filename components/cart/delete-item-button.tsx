@@ -14,26 +14,13 @@ export function DeleteItemButton({
   optimisticUpdate: any;
 }) {
   const [message, formAction] = useActionState(removeItem, null);
-  const merchandiseId = item.merchandise.id;
-  const removeItemAction = formAction.bind(null, merchandiseId);
 
-  const { cartItem, setCartItem } = useMyCart();
+  const { handleRemoveFromCart } = useMyCart();
 
-  const handleRemoveFromCart = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    const newCartItem = cartItem.filter((items) => items.id !== item.id)
-    setCartItem(newCartItem);
-  }
-
+  
   return (
     <form
-      action={async () => {
-        optimisticUpdate(merchandiseId, 'delete');
-        removeItemAction();
-      }}
-
-      onSubmit={handleRemoveFromCart}
+      onSubmit={(e) => {handleRemoveFromCart(e, item)}}
     >
       <button
         type="submit"

@@ -41,7 +41,7 @@ export const POST = async (request: SeoId) => {
 
     const { title, description } = await request.json();
 
-    if ( !title || !description || !productId || !collectionId ) {
+    if ( !title || !description || !productId ) {
         return NextResponse.json({ message: "All Fields are Required!!" }, { status: 400 });
     }
 
@@ -56,11 +56,11 @@ export const POST = async (request: SeoId) => {
                         id: productId,
                     }
                 },
-                collection: {
+                collection: collectionId ? {
                     connect: {
                         id: collectionId,
                     }
-                }
+                } : undefined,
             }
         })
 

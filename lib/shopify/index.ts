@@ -1,59 +1,55 @@
 import {
-    HIDDEN_PRODUCT_TAG,
-    SHOPIFY_GRAPHQL_API_ENDPOINT,
-    TAGS
+  HIDDEN_PRODUCT_TAG,
+  SHOPIFY_GRAPHQL_API_ENDPOINT,
+  TAGS
 } from 'lib/constants';
 import { isShopifyError } from 'lib/type-guards';
 import { ensureStartsWith } from 'lib/utils';
 import {
-    unstable_cacheLife as cacheLife,
-    unstable_cacheTag as cacheTag,
-    revalidateTag
+  unstable_cacheLife as cacheLife,
+  unstable_cacheTag as cacheTag,
+  revalidateTag
 } from 'next/cache';
 import { cookies, headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import {
-    addToCartMutation,
-    createCartMutation,
-    editCartItemsMutation,
-    removeFromCartMutation
+  addToCartMutation,
+  editCartItemsMutation,
+  removeFromCartMutation
 } from './mutations/cart';
 import { getCartQuery } from './queries/cart';
 import {
-    getCollectionProductsQuery,
-    getCollectionQuery
+  getCollectionProductsQuery,
+  getCollectionQuery
 } from './queries/collection';
 import { getMenuQuery } from './queries/menu';
 import { getPageQuery, getPagesQuery } from './queries/page';
 import {
-    getProductQuery,
-    getProductRecommendationsQuery,
-    getProductsQuery
+  getProductQuery,
+  getProductRecommendationsQuery
 } from './queries/product';
 import {
-    Cart,
-    Collection,
-    Connection,
-    Image,
-    Menu,
-    Page,
-    Product,
-    ShopifyAddToCartOperation,
-    ShopifyCart,
-    ShopifyCartOperation,
-    ShopifyCollection,
-    ShopifyCollectionOperation,
-    ShopifyCollectionProductsOperation,
-    ShopifyCreateCartOperation,
-    ShopifyMenuOperation,
-    ShopifyPageOperation,
-    ShopifyPagesOperation,
-    ShopifyProduct,
-    ShopifyProductOperation,
-    ShopifyProductRecommendationsOperation,
-    ShopifyProductsOperation,
-    ShopifyRemoveFromCartOperation,
-    ShopifyUpdateCartOperation
+  Cart,
+  Collection,
+  Connection,
+  Image,
+  Menu,
+  Page,
+  Product,
+  ShopifyAddToCartOperation,
+  ShopifyCart,
+  ShopifyCartOperation,
+  ShopifyCollection,
+  ShopifyCollectionOperation,
+  ShopifyCollectionProductsOperation,
+  ShopifyMenuOperation,
+  ShopifyPageOperation,
+  ShopifyPagesOperation,
+  ShopifyProduct,
+  ShopifyProductOperation,
+  ShopifyProductRecommendationsOperation,
+  ShopifyRemoveFromCartOperation,
+  ShopifyUpdateCartOperation
 } from './types';
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -212,11 +208,42 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
 };
 
 export async function createCart(): Promise<Cart> {
-  const res = await shopifyFetch<ShopifyCreateCartOperation>({
-    query: createCartMutation
-  });
+  const res = await fetch('http://localhost:3000/api/cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      checkoutUrl: 'https://example.com',
+      cost: {
+        subtotalAmount: {
+          amount: '0.0',
+          currencyCode: 'USD'
+        },
+        totalAmount: {
+          amount: '0.0',
+          currencyCode: 'USD'
+        },
+        totalTaxAmount: {
+          amount: '0.0',
+          currencyCode: 'USD'
+        }
+      },
+      totalQuantity: 0
+    }
+  )});
 
-  return reshapeCart(res.body.data.cartCreate.cart);
+  if (!res.ok) {
+    throw new Error(`Failed to create cart: ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  
+  if (data.error) {
+    throw new Error(`Error creating cart: ${data.error}`);
+  }
+
+  return data.cart;
 }
 
 export async function addToCart(
@@ -338,8 +365,6 @@ export async function getCollections(): Promise<Collection[]> {
     console.log('Fetching collections...');
 
     const res = await fetch('http://localhost:3000/api/collections');
-
-    console.log('Collections response:', res);
     
     if (!res.ok) {
         throw new Error(`Failed to fetch collections: ${res.statusText}`);
@@ -458,16 +483,48 @@ export async function getProducts({
   cacheTag(TAGS.products);
   cacheLife('days');
 
-  const res = await shopifyFetch<ShopifyProductsOperation>({
-    query: getProductsQuery,
-    variables: {
-      query,
-      reverse,
-      sortKey
-    }
-  });
+  const res = await fetch('http://localhost:3000/api/products');
+  if (!res.ok) {
+    throw new Error(`Failed to fetch products: ${res.statusText}`);
+  }
 
-  return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+  const data = await res.json();
+  if (data.error) {
+    throw new Error(`Error fetching products: ${data.error}`);
+  }
+
+
+  return addFeaturedImage(data.products);
+}
+
+export const addFeaturedImage = (products: any) => {
+  const reshapedProducts = [];
+
+  for (const product of products) {
+    if (product) {
+        const featuredImage = getFeaturedImage(product);
+        reshapedProducts.push({
+          ...product,
+          featuredImage: featuredImage
+        });
+    }
+  }
+
+  return reshapedProducts;
+}
+
+export const getFeaturedImage = (product: Product): Image | undefined => {
+  if (!product.images || product.images.length === 0) {
+    return undefined;
+  }
+
+  const featuredImage = product.images.find((image) => image.isFeatured);
+
+  if (featuredImage) {
+    return featuredImage;
+  }
+
+  return product.images[0];
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.

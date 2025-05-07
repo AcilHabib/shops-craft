@@ -26,17 +26,20 @@ export function VariantSelector({
     return null;
   }
 
-  const combinations: Combination[] = variants.map((variant) => ({
+  console.log('options', options);
+  console.log('variants', variants);
+
+  const combinations: Combination[] = variants?.map((variant) => ({
     id: variant.id,
     availableForSale: variant.availableForSale,
-    ...variant.selectedOptions.reduce(
+    ...((variant.selectedOptions ?? []).reduce(
       (accumulator, option) => ({ ...accumulator, [option.name.toLowerCase()]: option.value }),
       {}
-    )
+    ))
   }));
 
-  return options.map((option) => (
-    <form key={option.id}>
+  return options.map((option, index) => (
+    <form key={index}>
       <dl className="mb-8">
         <dt className="mb-4 text-sm uppercase tracking-wide">{option.name}</dt>
         <dd className="flex flex-wrap gap-3">

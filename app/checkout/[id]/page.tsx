@@ -5,8 +5,6 @@ import { useMyCart } from "components/cart/CartProvider";
 import { DeleteItemButton } from "components/cart/delete-item-button";
 import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
 import Price from "components/price";
-import { DEFAULT_OPTION } from "lib/constants";
-import { createUrl } from "lib/utils";
 import {
   ArrowLeft,
   ChevronDown,
@@ -16,33 +14,74 @@ import {
   Search,
   ShoppingCartIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function CheckoutPage() {
+
+  const [ emailOrPhone, setEmailOrPhone ] = useState("");
+  const [ firstName, setFirstName ] = useState("");
+  const [ lastName, setLastName ] = useState("");
+  const [ country, setCountry ] = useState("US");
+  const [ address, setAddress ] = useState("");
+  const [ apartment, setApartment ] = useState("");
+  const [ city, setCity ] = useState("");
+  const [ state, setState ] = useState("CA");
+  const [ zip, setZip ] = useState("90001");
+  // const [ saveInfo, setSaveInfo ] = useState(false);
+  const [ shippingMethod, setShippingMethod ] = useState("economy");
+  // const [ paymentMethod, setPaymentMethod ] = useState("creditCard");
+
   const [currentStep, setCurrentStep] = useState("information"); // information, shipping, payment
   const { cart } = useMyCart();
   const { updateCartItem } = useCart();
 
-  async function handleCheckout(formData: FormData) {
-    "use server";
-    const email = formData.get("email");
-    const firstName = formData.get("firstName");
-    const lastName = formData.get("lastName");
-    const country = formData.get("country") as string | null;
-    const address = formData.get("address");
-
-    console.log("email", email);
-    console.log("firstName", firstName);
-    console.log("lastName", lastName);
-    console.log("country", country);
-    console.log("address", address);
-  }
-
   type MerchandiseSearchParams = {
     [key: string]: string;
   };
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      console.log(emailOrPhone, firstName, lastName, country, address, apartment, city, state, zip);
+
+      const cartId = localStorage.getItem("cart")?.slice(1, -1) || "";
+
+      console.log(cartId);
+
+      const res = await fetch("http://localhost:3000/api/orders/customer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailOrPhone,
+          firstName,
+          lastName,
+          phone: "",
+          order: {
+            deleveryType: shippingMethod,
+          },
+          cartId,
+          address: {
+            address,
+            appartment: apartment,
+            city,
+            state,
+            zipCode: zip,
+          },
+        }),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error("Error creating customer:", data.message);
+        return;
+      }
+
+      console.log("Customer created:", data.order);
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -109,6 +148,7 @@ export default function CheckoutPage() {
                       id="email"
                       className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       defaultValue="sido@gmail.com"
+                      onChange={(e) => setEmailOrPhone(e.target.value)}
                     />
                   </div>
                   <div className="flex items-center mb-4">
@@ -138,6 +178,9 @@ export default function CheckoutPage() {
                           id="country"
                           className="w-full p-3 bg-black border border-gray-700 rounded appearance-none focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           defaultValue="US"
+                          // onClick={(e) => {console.log(e.target);console.log(e)}}
+                          onChange={(e) => {setCountry(e.target.value)}}
+                          // onSelect={(e) => setCountry(e.target.value)}
                         >
                           <option value="US">United States</option>
                           <option value="CA">Canada</option>
@@ -160,6 +203,7 @@ export default function CheckoutPage() {
                           id="firstName"
                           className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           defaultValue="sido"
+                          onChange={(e) => setFirstName(e.target.value)}
                         />
                       </div>
                       <div>
@@ -174,6 +218,7 @@ export default function CheckoutPage() {
                           id="lastName"
                           className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           defaultValue="sido"
+                          onChange={(e) => setLastName(e.target.value)}
                         />
                       </div>
                     </div>
@@ -191,6 +236,7 @@ export default function CheckoutPage() {
                           id="address"
                           className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           defaultValue="tenes"
+                          onChange={(e) => setAddress(e.target.value)}
                         />
                         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                       </div>
@@ -212,6 +258,7 @@ export default function CheckoutPage() {
                         type="text"
                         id="apartment"
                         className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        onChange={(e) => setApartment(e.target.value)}
                       />
                     </div>
 
@@ -227,6 +274,7 @@ export default function CheckoutPage() {
                         id="city"
                         className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         defaultValue="Los Angeles"
+                        onChange={(e) => setCity(e.target.value)}
                       />
                     </div>
 
@@ -243,6 +291,7 @@ export default function CheckoutPage() {
                             id="state"
                             className="w-full p-3 bg-black border border-gray-700 rounded appearance-none focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             defaultValue="CA"
+                            onChange={(e) => setState(e.target.value)}
                           >
                             <option value="CA">California</option>
                             <option value="NY">New York</option>
@@ -263,6 +312,7 @@ export default function CheckoutPage() {
                           id="zip"
                           className="w-full p-3 bg-black border border-gray-700 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           defaultValue="90001"
+                          onChange={(e) => setZip(e.target.value)}
                         />
                       </div>
                     </div>
@@ -281,46 +331,7 @@ export default function CheckoutPage() {
                     <button
                       className="w-full bg-blue-600 text-white py-4 px-6 rounded font-medium hover:bg-blue-700 transition-colors"
                       onClick={() => {
-                        const formData = new FormData();
-                        formData.append(
-                          "email",
-                          (document.getElementById("email") as HTMLInputElement)
-                            .value
-                        );
-                        formData.append(
-                          "firstName",
-                          (
-                            document.getElementById(
-                              "firstName"
-                            ) as HTMLInputElement
-                          ).value
-                        );
-                        formData.append(
-                          "lastName",
-                          (
-                            document.getElementById(
-                              "lastName"
-                            ) as HTMLInputElement
-                          ).value
-                        );
-                        formData.append(
-                          "country",
-                          (
-                            document.getElementById(
-                              "country"
-                            ) as HTMLSelectElement
-                          ).value
-                        );
-                        formData.append(
-                          "address",
-                          (
-                            document.getElementById(
-                              "address"
-                            ) as HTMLInputElement
-                          ).value
-                        );
                         setCurrentStep("shipping");
-                        handleCheckout(formData);
                       }}
                     >
                       Continue to shipping
@@ -371,6 +382,7 @@ export default function CheckoutPage() {
                             value="economy"
                             className="h-4 w-4 text-blue-600 border-gray-700 bg-black"
                             defaultChecked
+                            onChange={(e) => setShippingMethod(e.target.value)}
                           />
                           <div className="ml-3">
                             <span className="block">Economy</span>
@@ -388,6 +400,7 @@ export default function CheckoutPage() {
                             name="shipping"
                             value="standard"
                             className="h-4 w-4 text-blue-600 border-gray-700 bg-black"
+                            onChange={(e) => setShippingMethod(e.target.value)}
                           />
                           <div className="ml-3">
                             <span className="block">Standard</span>
@@ -410,7 +423,7 @@ export default function CheckoutPage() {
                       </button>
                       <button
                         className="bg-blue-600 text-white py-3 px-6 rounded font-medium hover:bg-blue-700 transition-colors"
-                        onClick={() => setCurrentStep("payment")}
+                        onClick={(e) => {setCurrentStep("payment"); handleSubmitOrder(e);}}
                       >
                         Continue to payment
                       </button>
@@ -503,98 +516,76 @@ export default function CheckoutPage() {
           ) : (
             <div className="flex h-full flex-col justify-between overflow-hidden p-1">
               <ul className="grow overflow-auto py-4">
-                {cart?.lines
-                  .sort((a, b) =>
-                    a.merchandise.product.title.localeCompare(
-                      b.merchandise.product.title
-                    )
-                  )
-                  .map((item, i) => {
-                    const merchandiseSearchParams =
-                      {} as MerchandiseSearchParams;
-
-                    item.merchandise.selectedOptions.forEach(
-                      ({ name, value }) => {
-                        if (value !== DEFAULT_OPTION) {
-                          merchandiseSearchParams[name.toLowerCase()] = value;
-                        }
-                      }
-                    );
-
-                    const merchandiseUrl = createUrl(
-                      `/product/${item.merchandise.product.handle}`,
-                      new URLSearchParams(merchandiseSearchParams)
-                    );
-
-                    return (
-                      <li
-                        key={i}
-                        className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
-                      >
-                        <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                          <div className="absolute z-40 -ml-1 -mt-2">
-                            <DeleteItemButton
-                              item={item}
-                              optimisticUpdate={updateCartItem}
-                            />
-                          </div>
-                          <div className="flex flex-row">
-                            <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                              <Image
-                                className="h-full w-full object-cover"
-                                width={64}
-                                height={64}
-                                alt={
-                                  item.merchandise.product.featuredImage
-                                    .altText || item.merchandise.product.title
-                                }
-                                src={item.merchandise.product.featuredImage.url}
-                              />
-                            </div>
-                            <Link
-                              href={merchandiseUrl}
-                              className="z-30 ml-2 flex flex-row space-x-4"
-                            >
-                              <div className="flex flex-1 flex-col text-base">
-                                <span className="leading-tight">
-                                  {item.merchandise.product.title}
-                                </span>
-                                {item.merchandise.title !== DEFAULT_OPTION ? (
-                                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                    {item.merchandise.title}
-                                  </p>
-                                ) : null}
+              {cart.lines.map((item, i) => 
+                    item.merchandise.map((merchandise) =>
+                      merchandise.product.map((product) => (
+                          <li
+                            key={i}
+                            className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
+                          >
+                            <div className="relative flex w-full flex-row justify-between px-1 py-4">
+                              <div className="absolute z-40 -ml-1 -mt-2">
+                                <DeleteItemButton
+                                  item={item}
+                                  optimisticUpdate={updateCartItem}
+                                />
                               </div>
-                            </Link>
-                          </div>
-                          <div className="flex h-16 flex-col justify-between">
-                            <Price
-                              className="flex justify-end space-y-2 text-right text-sm"
-                              amount={item.cost.totalAmount.amount}
-                              currencyCode={item.cost.totalAmount.currencyCode}
-                            />
-                            <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-                              <EditItemQuantityButton
-                                item={item}
-                                type="minus"
-                                optimisticUpdate={updateCartItem}
-                              />
-                              <p className="w-6 text-center">
-                                <span className="w-full text-sm">
-                                  {item.quantity}
-                                </span>
-                              </p>
-                              <EditItemQuantityButton
-                                item={item}
-                                type="plus"
-                                optimisticUpdate={updateCartItem}
-                              />
+                              <div className="flex flex-row">
+                                <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                                  {/* <Image
+                                    className="h-full w-full object-cover"
+                                    width={64}
+                                    height={64}
+                                    alt={
+                                      item.merchandise.product.featuredImage
+                                        .altText || item.merchandise.product.title
+                                    }
+                                    src={item.merchandise.product.featuredImage.url}
+                                  /> */}
+                                </div>
+                                <Link
+                                  href={""}
+                                  className="z-30 ml-2 flex flex-row space-x-4"
+                                >
+                                  <div className="flex flex-1 flex-col text-base">
+                                    {/* <span className="leading-tight">
+                                      {item.merchandise.product.title}
+                                    </span>
+                                    {item.merchandise.title !== DEFAULT_OPTION ? (
+                                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                        {item.merchandise.title}
+                                      </p> */}
+                                    {/* ) : null} */}
+                                  </div>
+                                </Link>
+                              </div>
+                              <div className="flex h-16 flex-col justify-between">
+                                <Price
+                                  className="flex justify-end space-y-2 text-right text-sm"
+                                  amount={item.cost.totalAmount.amount}
+                                  currencyCode={item.cost.totalAmount.currencyCode}
+                                />
+                                <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
+                                  <EditItemQuantityButton
+                                    item={item}
+                                    type="minus"
+                                    optimisticUpdate={updateCartItem}
+                                  />
+                                  <p className="w-6 text-center">
+                                    <span className="w-full text-sm">
+                                      {item.quantity}
+                                    </span>
+                                  </p>
+                                  <EditItemQuantityButton
+                                    item={item}
+                                    type="plus"
+                                    optimisticUpdate={updateCartItem}
+                                  />
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
+                          </li>
+                        ))))}
               </ul>
               <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                 <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">

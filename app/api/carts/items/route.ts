@@ -37,12 +37,12 @@ export const GET = async () => {
 
 export const POST = async (request: cartId) => {
 
-    const cartid = request.nextUrl.searchParams.get("cartId");
+    const cartId = request.nextUrl.searchParams.get("cartId");
     const productId = request.nextUrl.searchParams.get("productId");
 
-    const { quantity, cost } = await request.json();
+    const { quantity, cost, merchandise } = await request.json();
 
-    if ( !cartid || !productId || !quantity || !cost ) {
+    if ( !cartId || !productId || !quantity || !cost || !merchandise ) {
         return NextResponse.json({ message: "All Fields are Required!!" }, { status: 400 });
     }
 
@@ -52,9 +52,26 @@ export const POST = async (request: cartId) => {
             data: {
                 quantity: quantity,
                 cost: cost,
+                merchandise: {
+                    create: merchandise.map((merchandise: any) => ({
+                        title: merchandise.title,
+                        selectedOptions: {
+                            create: merchandise.selectedOptions.map((selectedOption: any) => ({
+                                name: selectedOption.name,
+                                value: selectedOption.value,
+                            }))
+                        },
+                        product: {
+                            create: merchandise.product.map((product: any) => ({
+                                title: product.title,
+                                handle: product.handle,
+                            }))
+                        }
+                    })),
+                },
                 cart: {
                     connect: {
-                        id: cartid,
+                        id: cartId,
                     }
                 },
                 product: {
@@ -65,11 +82,18 @@ export const POST = async (request: cartId) => {
             }
         })
 
-        if (!item) {
-            return NextResponse.json({ success: false, message: "Can not create a Cart Item" }, { status: 404 });
-        }
+        const cartItem = await prisma.cartItem.findUnique({
+            where: {
+                id: item.id,
+            },
+            include: {
+                merchandise: { include: { product: true, selectedOptions: true, cartItem: true } },
+                cart: true,
+                product: { include: { images: true, collection: true, options: true, seo: true, variants: true } },
+            }
+        })
 
-        return NextResponse.json({ success: true, message: "Cart Item has been created and saved Successfully" , item }, { status: 200 });
+        return NextResponse.json({ success: true, message: "Cart Item has been created and saved Successfully" , cartItem }, { status: 200 });
 
     } catch (error) {
         if (error instanceof Error) {

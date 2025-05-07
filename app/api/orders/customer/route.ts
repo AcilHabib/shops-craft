@@ -22,8 +22,9 @@ export const GET = async () => {
 };
 
 export const POST = async (request: CustomerOrderID) => {
-  const { lastName, email, phone, address } = await request.json();
-  if (!lastName || !email || !address || !phone) {
+  const { lastName, firstName, email, phone, order, cartId, address } = await request.json();
+
+  if (!lastName || !email ) {
     return NextResponse.json(
       { message: "All required fields are missing " },
       { status: 400 }
@@ -31,9 +32,23 @@ export const POST = async (request: CustomerOrderID) => {
   }
   try {
     const cstmr = await prisma.customer.create({
-      data: { lastName, email, phone, address },
+      data: { 
+        lastName, 
+        email, 
+        phone, 
+        firstName,
+        order: { create: { ...order, cart: { connect: { id: cartId } }} },
+        address: { create: { ...address } },
+      },
     });
-    return NextResponse.json({ success: true, cstmr }, { status: 201 });
+
+    const customerOrder = await prisma.customer.findUnique({
+      where: { id: cstmr.id },
+      include: { order: {include: { cart: { include: { lines: true } } }}, address: true },
+    });
+
+
+    return NextResponse.json({ success: true, order: customerOrder }, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
       console.error("error creatin customer ", error);

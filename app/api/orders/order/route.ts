@@ -23,7 +23,11 @@ export const GET = async () => {
 };
 
 export const POST = async (req: OrderID) => {
-  const { deliveryType, cartId, customerId } = await req.json();
+
+  const cartId = req.nextUrl.searchParams.get("cartId");
+  const customerId = req.nextUrl.searchParams.get("customerId");
+  const { deliveryType } = await req.json();
+
   if (!deliveryType || !cartId || !customerId) {
     return NextResponse.json(
       { message: "deliveryType, cartId, customerId are required" },
@@ -32,7 +36,7 @@ export const POST = async (req: OrderID) => {
   }
   try {
     const order = await prisma.order.create({
-      data: { deleveryType: deliveryType, cartId, customerId },
+      data: { deleveryType: deliveryType, cart: { connect: { id: cartId } }, customer: { connect: { id: customerId } } },
       include: { cart: true, customer: true },
     });
     return NextResponse.json({ success: true, order }, { status: 201 });

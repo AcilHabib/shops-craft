@@ -6,8 +6,6 @@ import clsx from 'clsx';
 import LoadingDots from 'components/loading-dots';
 import Price from 'components/price';
 import { DEFAULT_OPTION } from 'lib/constants';
-import { createUrl } from 'lib/utils';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -55,6 +53,8 @@ export default function CartModal() {
     }
   }, [isOpen, cart?.totalQuantity, quantityRef]);
 
+  useEffect(() => {}, [cart]);
+
   return (
     <>
       <button aria-label="Open cart" onClick={openCart}>
@@ -100,35 +100,13 @@ export default function CartModal() {
               ) : (
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                   <ul className="grow overflow-auto py-4">
-                    {cart.lines
-                      .sort((a, b) =>
-                        a.merchandise.product.title.localeCompare(
-                          b.merchandise.product.title
-                        )
-                      )
-                      .map((item, i) => {
-                        const merchandiseSearchParams =
-                          {} as MerchandiseSearchParams;
-
-                        item.merchandise.selectedOptions.forEach(
-                          ({ name, value }) => {
-                            if (value !== DEFAULT_OPTION) {
-                              merchandiseSearchParams[name.toLowerCase()] =
-                                value;
-                            }
-                          }
-                        );
-
-                        const merchandiseUrl = createUrl(
-                          `/product/${item.merchandise.product.handle}`,
-                          new URLSearchParams(merchandiseSearchParams)
-                        );
-
-                        return (
-                          <li
-                            key={i}
-                            className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
-                          >
+                  {cart.lines.map((item, i) => 
+                    item.merchandise.map((merchandise) =>
+                      merchandise.product.map((product) => (
+                        <li
+                          key={`${i}-${product.id}`}
+                          className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
+                        >
                             <div className="relative flex w-full flex-row justify-between px-1 py-4">
                               <div className="absolute z-40 -ml-1 -mt-2">
                                 <DeleteItemButton
@@ -138,33 +116,32 @@ export default function CartModal() {
                               </div>
                               <div className="flex flex-row">
                                 <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                  <Image
+                                  {/* <Image
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
                                     alt={
-                                      item.merchandise.product.featuredImage
-                                        .altText ||
-                                      item.merchandise.product.title
+                                      item.product.featuredImage?.altText ||
+                                      product.title
                                     }
                                     src={
-                                      item.merchandise.product.featuredImage.url
+                                      item.product.featuredImage?.url
                                     }
-                                  />
+                                  /> */}
                                 </div>
                                 <Link
-                                  href={merchandiseUrl}
+                                  href={`/product/${product.handle}`}
                                   onClick={closeCart}
                                   className="z-30 ml-2 flex flex-row space-x-4"
                                 >
                                   <div className="flex flex-1 flex-col text-base">
                                     <span className="leading-tight">
-                                      {item.merchandise.product.title}
+                                      {product.title}
                                     </span>
-                                    {item.merchandise.title !==
+                                    {merchandise.title !==
                                     DEFAULT_OPTION ? (
                                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {item.merchandise.title}
+                                        {merchandise.title}
                                       </p>
                                     ) : null}
                                   </div>
@@ -198,8 +175,7 @@ export default function CartModal() {
                               </div>
                             </div>
                           </li>
-                        );
-                      })}
+                        ))))}
                   </ul>
                   <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">

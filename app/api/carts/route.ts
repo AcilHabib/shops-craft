@@ -37,9 +37,17 @@ export const POST = async (request: CartId) => {
 
     const { checkoutUrl, cost, totalQuantity } = await request.json();
 
-    if ( !checkoutUrl || !cost || !totalQuantity ) {
+    console.log("checkoutUrl", checkoutUrl);
+    console.log("cost", cost);
+    console.log("totalQuantity", totalQuantity);
+
+    if ( !checkoutUrl || !cost ) {
         return NextResponse.json({ message: "checkoutUrl, cost and totalQuantity are Required!!" }, { status: 400 });
     }
+
+    console.log("checkoutUrl", checkoutUrl);
+    console.log("cost", cost);
+    console.log("totalQuantity", totalQuantity);
 
     try {
 

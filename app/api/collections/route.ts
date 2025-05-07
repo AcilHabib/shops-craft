@@ -15,7 +15,6 @@ export const GET = async () => {
     try {
         const collections = await prisma.collection.findMany({
             include: {
-                seo: true,
                 product: true,
             }
         })
@@ -90,7 +89,6 @@ export const PUT = async (req: CollectionId) => {
                 path: path || undefined,
             },
             include: {
-                seo: true,
                 product: true,
             },
         })
@@ -124,7 +122,6 @@ export const DELETE = async (req: CollectionId) => {
                 id: id,
             },
             include: {
-                seo: true,
                 product: true,
 
             }

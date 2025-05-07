@@ -8,7 +8,7 @@ import { ProductProvider } from 'components/product/product-context';
 import { ProductDescription } from 'components/product/product-description';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
 // import { getProduct, getProductRecommendations } from 'lib/shopify';
-import { products } from 'lib/mock';
+import { getProducts } from 'lib/shopify';
 import { Image } from 'lib/shopify/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -17,6 +17,7 @@ export async function generateMetadata(props: {
   params: Promise<{ handle: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
+  const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
   // const product = await getProduct(params.handle);
   const getProductsByHandle = (handle: string) => {
     return products.find((product) => product.handle === handle);
@@ -58,6 +59,7 @@ export async function generateMetadata(props: {
 
 export default async function ProductPage(props: { params: Promise<{ handle: string }> }) {
   const params = await props.params;
+  const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
   const getProductsByHandle = (handle: string) => {
     // Mock data for testing
     return products.find((product) => product.handle === handle);
@@ -124,7 +126,7 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
 }
 
 async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = products;// Mock data for testing
+  const relatedProducts = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });;// Mock data for testing
   // const relatedProducts = await getProductRecommendations(id);
 
   if (!relatedProducts.length) return null;
