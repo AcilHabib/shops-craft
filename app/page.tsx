@@ -12,7 +12,7 @@ export const metadata = {
 
 // comment test for deploy
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   return (

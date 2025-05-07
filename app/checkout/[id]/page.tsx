@@ -11,8 +11,6 @@ import {
   ChevronRight,
   CreditCard,
   Info,
-  Search,
-  ShoppingCartIcon,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -238,7 +236,7 @@ export default function CheckoutPage() {
                           defaultValue="tenes"
                           onChange={(e) => setAddress(e.target.value)}
                         />
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                        {/* <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" /> */}
                       </div>
                     </div>
 
@@ -508,7 +506,7 @@ export default function CheckoutPage() {
           {/* Right side - Order summary */}
           {!cart || cart.lines.length === 0 ? (
             <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
-              <ShoppingCartIcon className="h-16" />
+              {/* <ShoppingCart className="h-16" /> */}
               <p className="mt-6 text-center text-2xl font-bold">
                 Your cart is empty.
               </p>
