@@ -6,11 +6,11 @@ import { DeleteItemButton } from "components/cart/delete-item-button";
 import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
 import Price from "components/price";
 import {
-    ArrowLeft,
-    ChevronDown,
-    ChevronRight,
-    CreditCard,
-    Info,
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  CreditCard,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -47,7 +47,7 @@ export default function CheckoutPage() {
 
       console.log(cartId);
 
-      const res = await fetch(`${baseUrl}/api/orders/customer`, {
+      const res = await fetch(`/api/orders/customer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
