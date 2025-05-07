@@ -4,7 +4,7 @@ import {
   TAGS
 } from 'lib/constants';
 import { isShopifyError } from 'lib/type-guards';
-import { ensureStartsWith } from 'lib/utils';
+import { baseUrl, ensureStartsWith } from 'lib/utils';
 import {
   unstable_cacheLife as cacheLife,
   unstable_cacheTag as cacheTag,
@@ -206,7 +206,7 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
 };
 
 export async function createCart(): Promise<Cart> {
-  const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/cart`, {
+  const res = await fetch(`${baseUrl}/api/cart`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -333,9 +333,9 @@ export async function getCollectionProducts({
   sortKey?: string;
 }): Promise<Product[]> {
 
-  // 'use cache';
-  // cacheTag(TAGS.collections, TAGS.products);
-  // cacheLife('days');
+  'use cache';
+  cacheTag(TAGS.collections, TAGS.products);
+  cacheLife('days');
 
   console.log('Fetching collection products...');
 
@@ -359,7 +359,7 @@ export async function getCollections(): Promise<Collection[]> {
 
     console.log('Fetching collections...');
 
-    const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/collections`);
+    const res = await fetch(`${baseUrl}/api/collections`);
     
     if (!res.ok) {
         throw new Error(`Failed to fetch collections: ${res.statusText}`);
@@ -478,7 +478,7 @@ export async function getProducts({
   cacheTag(TAGS.products);
   cacheLife('days');
 
-  const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/products`);
+  const res = await fetch(`${baseUrl}/api/products`);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch products: ${res.statusText}`);
