@@ -1,0 +1,249 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model Product {
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
+  handle           String
+  availableForSale Boolean    @default(true)
+  title            String
+  description      String
+  descriptionHtml  String
+  tags             String[]
+  priceRange       PriceRange
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  options  ProductOption[]
+  variants ProductVariant[]
+  images   Image[]
+  seo      SEO?
+
+  cartitem     CartItem[] 
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+}
+
+model Collection {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  handle      String  @unique
+  title       String
+  description String
+  path        String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  // seo     SEO?
+  product Product[] // Simulated relation: list of Product IDs
+}
+
+model Cart {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  checkoutUrl   String
+  totalQuantity Int
+  cost          CartCost
+  
+  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime   @default(now())
+  
+  lines         CartItem[] 
+
+
+  Order Order[]
+}
+
+model Order{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  deleveryType String 
+
+  cartId String? @db.ObjectId
+  cart Cart? @relation(fields: [cartId], references: [id])
+  
+  customerId String? @unique @db.ObjectId
+  customer  Customer? @relation(fields: [customerId], references: [id])
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  }
+
+
+  model Customer{
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    firstName String?
+    lastName String 
+    email String?
+    isSubscribed Boolean @default(false)
+
+    phone String?
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    order Order[]
+    address Address[]
+  }
+
+
+
+  model Address {
+    id String @id @default (auto()) @map("_id") @db.ObjectId
+    state String 
+    city String 
+    address String 
+    appartment String?
+    zipCode String
+
+    customerId String ? @unique @db.ObjectId
+    customer Customer? @relation (fields: [customerId], references: [id])
+
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now()) 
+
+  }
+
+  
+
+model ProductOption {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  values String[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+model ProductVariant {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  availableForSale Boolean @default(true)
+  price            Money
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  selectedOptions SelectedOption[]
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+model SelectedOption {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  value String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  merchandiseId    String?
+  merchandise      Merchandise?    @relation(fields: [merchandiseId], references: [id])
+  productVariantId String?
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+}
+
+model Image {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  altText   String
+  isFeatured Boolean  @default(false)
+  width     Int
+  height    Int
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+model SEO {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId    String?     @unique
+  product      Product?    @relation(fields: [productId], references: [id])
+  // collectionId String?     @unique
+  // collection   Collection? @relation(fields: [collectionId], references: [id])
+}
+
+model CartItem {
+  id       String       @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int
+  cost     CartItemCost
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  merchandise Merchandise[]
+
+  productId String   
+  product   Product  @relation(fields: [productId], references: [id])
+  cartId    String?
+  cart      Cart?    @relation(fields: [cartId], references: [id])
+}
+
+model Merchandise {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  
+  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime         @default(now())
+
+  product         CartProduct[]
+  selectedOptions SelectedOption[]
+
+  cartItemId String?
+  cartItem   CartItem? @relation(fields: [cartItemId], references: [id])
+}
+
+model CartProduct {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  handle String
+  title  String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  MerchandiseId String?
+  merchandise   Merchandise? @relation(fields: [MerchandiseId], references: [id])
+}
+
+type Money {
+  amount       String
+  currencyCode String
+}
+
+type CartItemCost {
+  totalAmount Money
+}
+
+type CartCost {
+  subtotalAmount Money
+  totalAmount    Money
+  totalTaxAmount Money
+}
+
+type PriceRange {
+  maxVariantPrice Money
+  minVariantPrice Money
+}

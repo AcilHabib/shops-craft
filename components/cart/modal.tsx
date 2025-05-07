@@ -1,18 +1,17 @@
 'use client';
 
-import clsx from 'clsx';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 import LoadingDots from 'components/loading-dots';
 import Price from 'components/price';
 import { DEFAULT_OPTION } from 'lib/constants';
-import { createUrl } from 'lib/utils';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createCartAndSetCookie, redirectToCheckout } from './actions';
-import { useCart } from './cart-context';
+import { createCartAndSetCookie, redirectToCheckout, setCookies } from './actions';
+// import { useCart } from './cart-context';
+import { useMyCart } from './CartProvider';
 import { DeleteItemButton } from './delete-item-button';
 import { EditItemQuantityButton } from './edit-item-quantity-button';
 import OpenCart from './open-cart';
@@ -22,15 +21,22 @@ type MerchandiseSearchParams = {
 };
 
 export default function CartModal() {
-  const { cart, updateCartItem } = useCart();
+  // const { () => {} } = useCart();
+  const { cart } = useMyCart();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
+  // useEffect(() => {
+  //   setCookies('cartId', cart?.id || '');
+  // }, []);
+
   useEffect(() => {
     if (!cart) {
       createCartAndSetCookie();
+    } else {
+      setCookies('cartId', cart?.id || '');
     }
   }, [cart]);
 
@@ -46,6 +52,8 @@ export default function CartModal() {
       quantityRef.current = cart?.totalQuantity;
     }
   }, [isOpen, cart?.totalQuantity, quantityRef]);
+
+  useEffect(() => {}, [cart]);
 
   return (
     <>
@@ -92,71 +100,48 @@ export default function CartModal() {
               ) : (
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                   <ul className="grow overflow-auto py-4">
-                    {cart.lines
-                      .sort((a, b) =>
-                        a.merchandise.product.title.localeCompare(
-                          b.merchandise.product.title
-                        )
-                      )
-                      .map((item, i) => {
-                        const merchandiseSearchParams =
-                          {} as MerchandiseSearchParams;
-
-                        item.merchandise.selectedOptions.forEach(
-                          ({ name, value }) => {
-                            if (value !== DEFAULT_OPTION) {
-                              merchandiseSearchParams[name.toLowerCase()] =
-                                value;
-                            }
-                          }
-                        );
-
-                        const merchandiseUrl = createUrl(
-                          `/product/${item.merchandise.product.handle}`,
-                          new URLSearchParams(merchandiseSearchParams)
-                        );
-
-                        return (
-                          <li
-                            key={i}
-                            className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
-                          >
+                  {cart.lines.map((item, i) => 
+                    item.merchandise.map((merchandise) =>
+                      merchandise.product.map((product) => (
+                        <li
+                          key={`${i}-${product.id}`}
+                          className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
+                        >
                             <div className="relative flex w-full flex-row justify-between px-1 py-4">
                               <div className="absolute z-40 -ml-1 -mt-2">
                                 <DeleteItemButton
                                   item={item}
-                                  optimisticUpdate={updateCartItem}
+                                  optimisticUpdate={() => {}}
                                 />
                               </div>
                               <div className="flex flex-row">
                                 <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                  <Image
+                                  {/* <Image
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
                                     alt={
-                                      item.merchandise.product.featuredImage
-                                        .altText ||
-                                      item.merchandise.product.title
+                                      item.product.featuredImage?.altText ||
+                                      product.title
                                     }
                                     src={
-                                      item.merchandise.product.featuredImage.url
+                                      item.product.featuredImage?.url
                                     }
-                                  />
+                                  /> */}
                                 </div>
                                 <Link
-                                  href={merchandiseUrl}
+                                  href={`/product/${product.handle}`}
                                   onClick={closeCart}
                                   className="z-30 ml-2 flex flex-row space-x-4"
                                 >
                                   <div className="flex flex-1 flex-col text-base">
                                     <span className="leading-tight">
-                                      {item.merchandise.product.title}
+                                      {product.title}
                                     </span>
-                                    {item.merchandise.title !==
+                                    {merchandise.title !==
                                     DEFAULT_OPTION ? (
                                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {item.merchandise.title}
+                                        {merchandise.title}
                                       </p>
                                     ) : null}
                                   </div>
@@ -174,7 +159,7 @@ export default function CartModal() {
                                   <EditItemQuantityButton
                                     item={item}
                                     type="minus"
-                                    optimisticUpdate={updateCartItem}
+                                    optimisticUpdate={() => {}}
                                   />
                                   <p className="w-6 text-center">
                                     <span className="w-full text-sm">
@@ -184,14 +169,13 @@ export default function CartModal() {
                                   <EditItemQuantityButton
                                     item={item}
                                     type="plus"
-                                    optimisticUpdate={updateCartItem}
+                                    optimisticUpdate={() => {}}
                                   />
                                 </div>
                               </div>
                             </div>
                           </li>
-                        );
-                      })}
+                        ))))}
                   </ul>
                   <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
@@ -241,7 +225,7 @@ function CloseCart({ className }: { className?: string }) {
   );
 }
 
-function CheckoutButton() {
+export function CheckoutButton() {
   const { pending } = useFormStatus();
 
   return (

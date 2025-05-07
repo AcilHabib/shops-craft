@@ -32,12 +32,14 @@ export type CartItem = {
       name: string;
       value: string;
     }[];
-    product: CartProduct;
-  };
+    product: CartProduct[];
+  }[];
+  productId?: string;
 };
 
 export type Collection = ShopifyCollection & {
   path: string;
+  product?: Product[];
 };
 
 export type Image = {
@@ -45,6 +47,7 @@ export type Image = {
   altText: string;
   width: number;
   height: number;
+  isFeatured: boolean;
 };
 
 export type Menu = {
