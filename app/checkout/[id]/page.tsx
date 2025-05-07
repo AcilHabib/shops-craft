@@ -47,7 +47,7 @@ export default function CheckoutPage() {
 
       console.log(cartId);
 
-      const res = await fetch("https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/orders/customer", {
+      const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/orders/customer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -31,7 +31,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
             const isCartEmpty = localStorage.getItem('cart') === null;
             if (isCartEmpty) {
                 console.log('Creating a new cart...');
-                const res = await fetch("https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/carts", {
+                const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/carts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ ...mockCart })
@@ -47,7 +47,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
                 localStorage.setItem('cart', JSON.stringify(data.cart.id));
             } else {
                 console.log('Cart already exists in localStorage:', localStorage.getItem('cart'));
-                const res = await fetch(`https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/carts/cart?cartId=${localStorage.getItem('cart')?.slice(1, -1)}`);
+                const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/carts/cart?cartId=${localStorage.getItem('cart')?.slice(1, -1)}`);
                 if (!res.ok) {
                     throw new Error("Failed to fetch cart");
                 }
@@ -142,7 +142,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
         // get cartId from localStorage
         const cartId = localStorage.getItem('cart');
 
-        const res = await fetch(`https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/carts/items?cartId=${cartId?.slice(1, cartId.length - 1)}&productId=${product.id}`, {
+        const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/carts/items?cartId=${cartId?.slice(1, cartId.length - 1)}&productId=${product.id}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
     
         setCartItem(updatedCart);
     
-        const res = await fetch(`https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/carts/items?id=${item.id}`, {
+        const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/carts/items?id=${item.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -242,7 +242,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
     const handleRemoveFromCart = async (event: React.FormEvent, item: CartItem) => {
         event.preventDefault();
     
-        const res = await fetch(`https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/carts/items?id=${item.id}`, {
+        const res = await fetch(`${process.env.VERCEL_PUPLIC_API_URL}/api/carts/items?id=${item.id}`, {
           method: 'DELETE',
         });
     
