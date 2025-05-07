@@ -1,16 +1,56 @@
 export default {
   experimental: {
-    ppr: true,
+    // ppr: true,
     inlineCss: true,
-    useCache: true
+    useCache: true,
   },
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.shopify.com",
+        pathname: "/s/files/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+        pathname: "/**", // allow all images from this domain
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.fantaskycdn.com',
+        pathname: '/**' // allow all images from this domain
+      },
       {
         protocol: 'https',
         hostname: 'cdn.shopify.com',
         pathname: '/s/files/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pinimg.com',
+        pathname: '/**' // allow all images from this domain
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.fantaskycdn.com',
+        pathname: '/**' // allow all images from this domain
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.rushordertees.com',
+        pathname: '/**' // allow all images from this domain
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**' // allow all images from this domain
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.trueclassictees.com',
+        pathname: '/**' // allow all images from this domain
       }
     ]
   }
