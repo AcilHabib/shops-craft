@@ -206,7 +206,7 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
 };
 
 export async function createCart(): Promise<Cart> {
-  const res = await fetch('http://localhost:3000/api/cart', {
+  const res = await fetch('https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/cart', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -359,7 +359,7 @@ export async function getCollections(): Promise<Collection[]> {
 
     console.log('Fetching collections...');
 
-    const res = await fetch('http://localhost:3000/api/collections');
+    const res = await fetch('https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/collections');
     
     if (!res.ok) {
         throw new Error(`Failed to fetch collections: ${res.statusText}`);
@@ -478,7 +478,7 @@ export async function getProducts({
   cacheTag(TAGS.products);
   cacheLife('days');
 
-  const res = await fetch('http://localhost:3000/api/products');
+  const res = await fetch('https://shadow-git-stage-l3alisidahmeds-projects.vercel.app//api/products');
 
   if (!res.ok) {
     throw new Error(`Failed to fetch products: ${res.statusText}`);
