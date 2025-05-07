@@ -15,7 +15,12 @@ export const GET = async () => {
     try {
         const collections = await prisma.collection.findMany({
             include: {
-                product: true,
+                product: { include: {
+                        images: true,
+                        variants: true,
+                        options: true,
+                        seo: true,
+                } },
             }
         })
 

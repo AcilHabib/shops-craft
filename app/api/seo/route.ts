@@ -15,7 +15,6 @@ export const GET = async () => {
     try {
         const seo = await prisma.sEO.findMany({
             include: {
-                collection: true,
                 product: true,
             }
         })
@@ -56,11 +55,6 @@ export const POST = async (request: SeoId) => {
                         id: productId,
                     }
                 },
-                collection: collectionId ? {
-                    connect: {
-                        id: collectionId,
-                    }
-                } : undefined,
             }
         })
 
@@ -99,7 +93,6 @@ export const PUT = async (req: SeoId) => {
                 description: description || undefined,
             },
             include: {
-                collection: true,
                 product: true,
             }
         })
@@ -133,7 +126,6 @@ export const DELETE = async (req: SeoId) => {
                 id: id,
             },
             include: {
-                collection: true,
                 product: true,
             }
         })

@@ -19,7 +19,6 @@ import {
 } from './mutations/cart';
 import { getCartQuery } from './queries/cart';
 import {
-  getCollectionProductsQuery,
   getCollectionQuery
 } from './queries/collection';
 import { getMenuQuery } from './queries/menu';
@@ -41,7 +40,6 @@ import {
   ShopifyCartOperation,
   ShopifyCollection,
   ShopifyCollectionOperation,
-  ShopifyCollectionProductsOperation,
   ShopifyMenuOperation,
   ShopifyPageOperation,
   ShopifyPagesOperation,
@@ -334,27 +332,24 @@ export async function getCollectionProducts({
   reverse?: boolean;
   sortKey?: string;
 }): Promise<Product[]> {
-  'use cache';
-  cacheTag(TAGS.collections, TAGS.products);
-  cacheLife('days');
 
-  const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
-    query: getCollectionProductsQuery,
-    variables: {
-      handle: collection,
-      reverse,
-      sortKey: sortKey === 'CREATED_AT' ? 'CREATED' : sortKey
-    }
-  });
+  // 'use cache';
+  // cacheTag(TAGS.collections, TAGS.products);
+  // cacheLife('days');
 
-  if (!res.body.data.collection) {
-    console.log(`No collection found for \`${collection}\``);
-    return [];
-  }
+  console.log('Fetching collection products...');
 
-  return reshapeProducts(
-    removeEdgesAndNodes(res.body.data.collection.products)
+  const collections = await getCollections();
+  
+  console.log('collections', collections);
+
+  const collectionHandle = collections.find(
+    (c) => c.title === collection
   );
+
+  console.log('collectionHandle', collectionHandle);
+
+  return addFeaturedImage(collectionHandle?.product);
 }
 
 export async function getCollections(): Promise<Collection[]> {
@@ -484,6 +479,7 @@ export async function getProducts({
   cacheLife('days');
 
   const res = await fetch('http://localhost:3000/api/products');
+
   if (!res.ok) {
     throw new Error(`Failed to fetch products: ${res.statusText}`);
   }
@@ -493,8 +489,11 @@ export async function getProducts({
     throw new Error(`Error fetching products: ${data.error}`);
   }
 
+  const searchResult = data.products.filter((product: Product) => {
+      return query ? product.title.toLowerCase().includes(query.toLowerCase()) : true;
+  });
 
-  return addFeaturedImage(data.products);
+  return addFeaturedImage(query ? searchResult : data.products);
 }
 
 export const addFeaturedImage = (products: any) => {

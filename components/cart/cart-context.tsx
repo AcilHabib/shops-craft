@@ -85,17 +85,17 @@ function createOrUpdateCartItem(
         currencyCode: variant.price.currencyCode
       }
     },
-    merchandise: {
+    merchandise: [{
       id: variant.id,
       title: variant.title,
       selectedOptions: variant.selectedOptions,
-      product: {
+      product: [{
         id: product.id,
         handle: product.handle,
         title: product.title,
         featuredImage: product.featuredImage
-      }
-    }
+      }]
+    }]
   };
 }
 
@@ -141,10 +141,12 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
       const { merchandiseId, updateType } = action.payload;
       const updatedLines = currentCart.lines
         .map((item) =>
-          item.merchandise.id === merchandiseId
+          item.merchandise.map((merch) => (merch.id === merchandiseId
             ? updateCartItem(item, updateType)
             : item
+          ))
         )
+        .flat()
         .filter(Boolean) as CartItem[];
 
       if (updatedLines.length === 0) {
@@ -168,7 +170,7 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
     case 'ADD_ITEM': {
       const { variant, product } = action.payload;
       const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id
+        (item) => item.merchandise.some((merch) => merch.id === variant.id)
       );
       const updatedItem = createOrUpdateCartItem(
         existingItem,
@@ -178,7 +180,7 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
 
       const updatedLines = existingItem
         ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item
+            item.merchandise.some((merch) => merch.id === variant.id) ? updatedItem : item
           )
         : [...currentCart.lines, updatedItem];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "components/cart/cart-context";
+// import { useCart } from "components/cart/cart-context";
 import { useMyCart } from "components/cart/CartProvider";
 import { DeleteItemButton } from "components/cart/delete-item-button";
 import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
 
   const [currentStep, setCurrentStep] = useState("information"); // information, shipping, payment
   const { cart } = useMyCart();
-  const { updateCartItem } = useCart();
+  // const { updateCartItem } = useCart();
 
   type MerchandiseSearchParams = {
     [key: string]: string;
@@ -527,7 +527,7 @@ export default function CheckoutPage() {
                               <div className="absolute z-40 -ml-1 -mt-2">
                                 <DeleteItemButton
                                   item={item}
-                                  optimisticUpdate={updateCartItem}
+                                  optimisticUpdate={() => {}}
                                 />
                               </div>
                               <div className="flex flex-row">
@@ -569,7 +569,7 @@ export default function CheckoutPage() {
                                   <EditItemQuantityButton
                                     item={item}
                                     type="minus"
-                                    optimisticUpdate={updateCartItem}
+                                    optimisticUpdate={() => {}}
                                   />
                                   <p className="w-6 text-center">
                                     <span className="w-full text-sm">
@@ -579,7 +579,7 @@ export default function CheckoutPage() {
                                   <EditItemQuantityButton
                                     item={item}
                                     type="plus"
-                                    optimisticUpdate={updateCartItem}
+                                    optimisticUpdate={() => {}}
                                   />
                                 </div>
                               </div>
