@@ -2,7 +2,7 @@ import { Cart, Product, ShopifyCollection } from "./shopify/types";
 
 export const mockCart: Cart = {
   id: "cart123",
-  checkoutUrl: "http://localhost:3000//checkout/cart123",
+  checkoutUrl: "",
   cost: {
     subtotalAmount: {
       amount: "0.00",

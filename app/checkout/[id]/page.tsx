@@ -5,6 +5,7 @@ import { useMyCart } from "components/cart/CartProvider";
 import { DeleteItemButton } from "components/cart/delete-item-button";
 import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
 import Price from "components/price";
+import { DEFAULT_OPTION } from "lib/constants";
 import {
   ArrowLeft,
   ChevronDown,
@@ -31,12 +32,12 @@ export default function CheckoutPage() {
   // const [ paymentMethod, setPaymentMethod ] = useState("creditCard");
 
   const [currentStep, setCurrentStep] = useState("information"); // information, shipping, payment
-  const { cart } = useMyCart();
-  // const { updateCartItem } = useCart();
+  const { cart, featuredImage, getCartById } = useMyCart();
 
   type MerchandiseSearchParams = {
     [key: string]: string;
   };
+
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -80,6 +81,16 @@ export default function CheckoutPage() {
 
       console.log("Customer created:", data.order);
   }
+
+  React.useEffect(() => {
+    const cartId = localStorage.getItem("cart")?.slice(1, -1) || "";
+    console.log(cartId);
+    if (cartId) {
+      getCartById(cartId);
+    } else {
+      console.error("No cart ID found in local storage");
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -534,26 +545,23 @@ export default function CheckoutPage() {
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
-                                    alt={
-                                      item.merchandise.product.featuredImage
-                                        .altText || item.merchandise.product.title
-                                    }
-                                    src={item.merchandise.product.featuredImage.url}
+                                    src={featuredImage.url}
+                                    alt={featuredImage.altText}
                                   /> */}
                                 </div>
                                 <Link
-                                  href={""}
+                                  href={``} // /product/${product.handle}
                                   className="z-30 ml-2 flex flex-row space-x-4"
                                 >
                                   <div className="flex flex-1 flex-col text-base">
-                                    {/* <span className="leading-tight">
-                                      {item.merchandise.product.title}
+                                    <span className="leading-tight">
+                                      {product.title}
                                     </span>
-                                    {item.merchandise.title !== DEFAULT_OPTION ? (
+                                    {merchandise.title !== DEFAULT_OPTION ? (
                                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {item.merchandise.title}
-                                      </p> */}
-                                    {/* ) : null} */}
+                                        {merchandise.title}
+                                      </p>
+                                    ) : null}
                                   </div>
                                 </Link>
                               </div>

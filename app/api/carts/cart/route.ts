@@ -30,7 +30,17 @@ export const GET = async (request: CartId) => {
                             include: {
                                 product: true,
                                 selectedOptions: true,
-                                cartItem: true,
+                                cartItem: {
+                                    include: {
+                                        product: {
+                                            include: {
+                                                images: true,
+                                                options: true,
+                                                variants: true,
+                                            },
+                                        }
+                                    }
+                                },
                             }
                         }
                     }

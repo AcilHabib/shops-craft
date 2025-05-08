@@ -6,11 +6,13 @@ import clsx from 'clsx';
 import LoadingDots from 'components/loading-dots';
 import Price from 'components/price';
 import { DEFAULT_OPTION } from 'lib/constants';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createCartAndSetCookie, redirectToCheckout, setCookies } from './actions';
+import { createCartAndSetCookie, setCookies } from './actions';
 // import { useCart } from './cart-context';
+import { redirect } from 'next/navigation';
 import { useMyCart } from './CartProvider';
 import { DeleteItemButton } from './delete-item-button';
 import { EditItemQuantityButton } from './edit-item-quantity-button';
@@ -21,16 +23,11 @@ type MerchandiseSearchParams = {
 };
 
 export default function CartModal() {
-  // const { () => {} } = useCart();
-  const { cart } = useMyCart();
+  const { cart, featuredImage } = useMyCart();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
-
-  // useEffect(() => {
-  //   setCookies('cartId', cart?.id || '');
-  // }, []);
 
   useEffect(() => {
     if (!cart) {
@@ -116,18 +113,13 @@ export default function CartModal() {
                               </div>
                               <div className="flex flex-row">
                                 <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                  {/* <Image
+                                  <Image
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
-                                    alt={
-                                      item.product.featuredImage?.altText ||
-                                      product.title
-                                    }
-                                    src={
-                                      item.product.featuredImage?.url
-                                    }
-                                  /> */}
+                                    src={featuredImage.url}
+                                    alt={featuredImage.altText}
+                                  />
                                 </div>
                                 <Link
                                   href={`/product/${product.handle}`}
@@ -199,7 +191,7 @@ export default function CartModal() {
                       />
                     </div>
                   </div>
-                  <form action={redirectToCheckout}>
+                  <form action={() => redirect(`${cart.checkoutUrl}/checkout/${cart.id}`)}>
                     <CheckoutButton />
                   </form>
                 </div>

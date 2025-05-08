@@ -2,8 +2,9 @@
 
 import { mockCart, products } from "lib/mock";
 // import { createCart } from "lib/shopify";
-import { Cart, CartItem, Product } from "lib/shopify/types";
-import React, { useEffect } from "react";
+import { Cart, CartItem, Image, Product } from "lib/shopify/types";
+import { baseUrl } from "lib/utils";
+import React, { use, useEffect } from "react";
 
 interface CartContextType {
     cart: Cart | undefined;
@@ -11,6 +12,9 @@ interface CartContextType {
     cartItem: CartItem[];
     setCartItem: (cartItem: CartItem[]) => void;
     products: Product[];
+    featuredImage: Image;
+    setFeaturedImage: (featuredImage: Image) => void;
+    getCartById: (cartId: string) => void;
     handleAddToCart: (event: React.FormEvent, product: Product) => void;
     handleUpdateItemQuantity: (event: React.FormEvent, item: CartItem, type: string) => void;
     handleRemoveFromCart: (event: React.FormEvent, item: CartItem) => void;
@@ -22,6 +26,17 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
 
     const [cart, setCart] = React.useState<Cart>(mockCart);
     const [cartItem, setCartItem] = React.useState<CartItem[]>([]);
+    const [featuredImage, setFeaturedImage] = React.useState<Image>({
+        url: '', 
+        altText: '', 
+        width: 0, 
+        height: 0, 
+        isFeatured: false
+    });
+
+    useEffect(() => {
+      console.log('featuredImage', featuredImage);
+    }, [featuredImage])
 
     useEffect(() => {
         // check if the cart already exists in localStorage this mean is does not need to create a new cart
@@ -33,7 +48,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
                 const res = await fetch(`/api/carts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...mockCart })
+                    body: JSON.stringify({ ...mockCart, checkoutUrl: `${baseUrl}` })
                 });
 
                 if (!res.ok) {
@@ -163,12 +178,39 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
 
           const featuredImage = data.cartItem.product.images.find((image: any) => image.isFeatured);
 
+          setFeaturedImage(featuredImage);
+
           const updatedCartItem = { ...data.cartItem, product: { ...data.cartItem.product, featuredImage: { ...featuredImage } } };
 
           console.log('featuredImage', featuredImage);
           console.log('updatedCartItem', updatedCartItem);
         
         return updatedCartItem;
+    }
+
+    const getCartById = async (cartId: string) => {
+        console.log('cartId', cartId);
+        const res = await fetch(`/api/carts/cart?cartId=${cartId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to fetch cart');
+        }
+
+        const data = await res.json();
+
+        if (!data) {
+            throw new Error('Failed to fetch cart');
+        }
+
+        console.log('Fetched cart:', data.cart);
+
+        setCart(data.cart);
+        setCartItem(data.cart.lines); 
     }
     
     const handleAddToCart = async (event: React.FormEvent, product: Product) => {
@@ -271,6 +313,9 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
             cartItem, 
             setCartItem, 
             products,
+            featuredImage,
+            setFeaturedImage,
+            getCartById,
             handleAddToCart,
             handleUpdateItemQuantity, 
             handleRemoveFromCart 
