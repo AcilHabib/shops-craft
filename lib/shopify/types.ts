@@ -34,6 +34,7 @@ export type CartItem = {
     }[];
     product: CartProduct[];
   }[];
+  product?: CartProduct;
   productId?: string;
 };
 
@@ -79,7 +80,7 @@ export type Product = Omit<ShopifyProduct, 'variants' | 'images'> & {
 export type ProductOption = {
   id: string;
   name: string;
-  values: string[];
+  values: { id: string; value: string }[];
 };
 
 export type ProductVariant = {
@@ -110,16 +111,14 @@ export type ShopifyCart = {
   totalQuantity: number;
 };
 
-export type ShopifyCollection = {
+export type ShopifyCollection = db & {
   handle: string;
   title: string;
   description: string;
   seo: SEO;
-  updatedAt: string;
 };
 
-export type ShopifyProduct = {
-  id: string;
+export type ShopifyProduct = db & {
   handle: string;
   availableForSale: boolean;
   title: string;
@@ -130,13 +129,51 @@ export type ShopifyProduct = {
     maxVariantPrice: Money;
     minVariantPrice: Money;
   };
-  variants: Connection<ProductVariant>;
+  variants: ProductVariant[];
   featuredImage: Image;
-  images: Connection<Image>;
+  images: Image[];
   seo: SEO;
   tags: string[];
+  collection: Collection
+};
+
+
+export type db = {
+  id: string;
+  createdAt: string;
   updatedAt: string;
 };
+
+export type Customer = db & {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  isSubscribed: boolean;
+  passwordString: string;
+  review: Reviews[];
+  feedback: Feedback[];
+  cart: Cart;
+}
+
+export type Reviews = db & {
+  title: string;
+  rating: number;
+  body: string;
+  comment: string;
+  customer: Customer;
+}
+
+export type Feedback = db & {
+  rating: number;
+  comment: string;
+  customer: Customer;
+}
+
+export type ProductInformation = db & {
+  name: string;
+  value: string;
+}
 
 export type ShopifyCartOperation = {
   data: {
