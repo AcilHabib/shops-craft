@@ -24,23 +24,48 @@ model Product {
   descriptionHtml  String
   tags             String[]
   priceRange       PriceRange
+  isNew            Boolean?    @default(false)
+  isOnSale         Boolean?    @default(false)
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
+  featuredImageId String? @unique
+  featuredImage   Image?  @relation("FeaturedImage", fields: [featuredImageId], references: [id])
+
   options  ProductOption[]
   variants ProductVariant[]
-  images   Image[]
+  images   Image[]          @relation("ProductImages")
+  review   Review[]
+  saleProduct SaleProduct[]
   seo      SEO?
+  informations ProductInformations[]
+  wishListItems WishListItem[]
 
   cartitem     CartItem[] 
   collectionId String?
   collection   Collection? @relation(fields: [collectionId], references: [id])
+  categoryId   String?
+  category     category? @relation(fields: [categoryId], references: [id])
 }
 
 model Collection {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   handle      String  @unique
+  title       String
+  description String
+  path        String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  // seo     SEO?
+  product Product[] // Simulated relation: list of Product IDs
+}
+
+model category {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  handle      String @unique
   title       String
   description String
   path        String
@@ -62,9 +87,10 @@ model Cart {
   createdAt     DateTime   @default(now())
   
   lines         CartItem[] 
-
-
   Order Order[]
+
+  customerId String?   @unique @db.ObjectId
+  customer   Customer? @relation(fields: [customerId], references: [id])
 }
 
 model Order{
@@ -83,21 +109,25 @@ model Order{
   }
 
 
-  model Customer{
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    firstName String?
-    lastName String 
-    email String?
-    isSubscribed Boolean @default(false)
+model Customer {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  firstName    String?
+  lastName     String
+  email        String?
+  phone     String?
+  isSubscribed Boolean @default(false)
+  password    String?
 
-    phone String?
-    updatedAt DateTime @updatedAt
-    createdAt DateTime @default(now())
-    order Order[]
-    address Address[]
-  }
-
-
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+  
+  order     Order[]
+  address   Address[]
+  review    Review[]
+  cart      Cart?
+  feedback  Feedback?
+  wishlist WishList[]
+}
 
   model Address {
     id String @id @default (auto()) @map("_id") @db.ObjectId
@@ -115,12 +145,10 @@ model Order{
 
   }
 
-  
-
 model ProductOption {
   id     String   @id @default(auto()) @map("_id") @db.ObjectId
   name   String
-  values String[]
+  values OptionValue[]
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -129,9 +157,21 @@ model ProductOption {
   product   Product? @relation(fields: [productId], references: [id])
 }
 
+model OptionValue {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  value  String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productOptionId String?
+  productOption   ProductOption? @relation(fields: [productOptionId], references: [id])
+}
+
 model ProductVariant {
   id               String  @id @default(auto()) @map("_id") @db.ObjectId
   title            String
+  quantity         Int 
   availableForSale Boolean @default(true)
   price            Money
 
@@ -142,6 +182,20 @@ model ProductVariant {
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
+}
+
+// this is the modal dedicated for the additional product informations (name: value)
+model ProductInformations {
+  id     String @id @default (auto()) @map("_id") @db.ObjectId
+  name   String 
+  value  String 
+
+  createdAt DateTime @default (now())
+  updatedAt DateTime @updatedAt 
+
+  productId String? 
+  product   Product? @relation ( fields: [productId], references: [id])
+
 }
 
 model SelectedOption {
@@ -159,19 +213,48 @@ model SelectedOption {
 }
 
 model Image {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  url       String
-  altText   String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  url        String
+  altText    String
   isFeatured Boolean  @default(false)
-  width     Int
-  height    Int
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  width      Int
+  height     Int
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
 
   productId String?
-  product   Product? @relation(fields: [productId], references: [id])
+  product   Product? @relation("ProductImages", fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  featuredInProduct Product? @relation("FeaturedImage")
 }
 
+
+model WishList{
+  id   String @id @default(auto()) @map("_id") @db.ObjectId 
+
+  createdAt DateTime @default (now())
+  updatedAt DateTime @updatedAt
+
+  customerId String?
+  customer Customer? @relation(fields:[customerId], references: [id])
+  
+  wishListItems WishListItem[]
+} 
+
+
+model WishListItem{
+  id   String @id @default(auto()) @map("_id") @db.ObjectId 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wishListId String?
+  wishList  WishList? @relation(fields: [wishListId] , references: [id])
+
+  productId String?
+  product  Product? @relation(fields: [productId], references : [id])
+
+}
 model SEO {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -226,6 +309,51 @@ model CartProduct {
 
   MerchandiseId String?
   merchandise   Merchandise? @relation(fields: [MerchandiseId], references: [id])
+}
+
+model Sale {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  title  String
+  percentage Int
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  products SaleProduct[]
+}
+
+model SaleProduct {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  price  Money
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  productId String?  
+  product   Product?  @relation(fields: [productId], references: [id])
+  saleId    String?
+  sale      Sale? @relation(fields: [saleId], references: [id])
+}
+
+model Review {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  body      String
+  rating    Int
+  customerId String? @db.ObjectId
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  productId  String? @db.ObjectId
+  product    Product? @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  rating      Int
+  comment    String
+  customerId String? @unique @db.ObjectId
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 type Money {
