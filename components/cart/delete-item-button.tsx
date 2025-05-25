@@ -2,9 +2,9 @@
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { removeItem } from 'components/cart/actions';
+import { useCartModalContext } from 'context/CartSidebarModalContext';
 import type { CartItem } from 'lib/shopify/types';
 import { useActionState } from 'react';
-import { useMyCart } from './CartProvider';
 
 export function DeleteItemButton({
   item,
@@ -15,12 +15,13 @@ export function DeleteItemButton({
 }) {
   const [message, formAction] = useActionState(removeItem, null);
 
-  const { handleRemoveFromCart } = useMyCart();
+  // const { handleRemoveFromCart } = useMyCart();
+  const { handleRemoveFromCart } = useCartModalContext();
 
   
   return (
     <form
-      onSubmit={(e) => {handleRemoveFromCart(e, item)}}
+      onSubmit={async (e) => {e.preventDefault(); await handleRemoveFromCart(item)}}
     >
       <button
         type="submit"

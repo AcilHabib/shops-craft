@@ -2,10 +2,8 @@
 
 import { MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import { updateItemQuantity } from 'components/cart/actions';
+import { useCartModalContext } from 'context/CartSidebarModalContext';
 import type { CartItem } from 'lib/shopify/types';
-import { useActionState } from 'react';
-import { useMyCart } from './CartProvider';
 
 function SubmitButton({ type }: { type: 'plus' | 'minus' }) {
   return (
@@ -33,22 +31,28 @@ function SubmitButton({ type }: { type: 'plus' | 'minus' }) {
 export function EditItemQuantityButton({
   item,
   type,
+  quantity,
   optimisticUpdate
 }: {
   item: CartItem;
   type: 'plus' | 'minus';
+  quantity: number;
   optimisticUpdate: any;
 }) {
-  const [message, formAction] = useActionState(updateItemQuantity, null);
-  const { handleUpdateItemQuantity } = useMyCart();
+  // const [message, formAction] = useActionState(updateItemQuantity, null);
+  // const { handleUpdateItemQuantity } = useMyCart();
+  const { handleUpdateItemQuantity } = useCartModalContext();
 
   return (
     <form
-      onSubmit={(e) => {handleUpdateItemQuantity(e, item, type)}}
+      onSubmit={async (e) => {
+        e.preventDefault();
+        await handleUpdateItemQuantity(type === 'plus' ? "increment" : "decrement", item, quantity);
+      }}
     >
       <SubmitButton type={type} />
       <p aria-live="polite" className="sr-only" role="status">
-        {message}
+        {quantity} {type === 'plus' ? 'increased' : 'decreased'}.
       </p>
     </form>
   );

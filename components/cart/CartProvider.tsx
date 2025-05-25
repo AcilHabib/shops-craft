@@ -2,18 +2,19 @@
 
 import { mockCart, products } from "lib/mock";
 // import { createCart } from "lib/shopify";
-import { Cart, CartItem, Image, Product } from "lib/shopify/types";
-import { baseUrl } from "lib/utils";
-import React, { use, useEffect } from "react";
+import { Cart, CartItem, Product } from "lib/shopify/types";
+import React, { useEffect } from "react";
 
 interface CartContextType {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
     cart: Cart | undefined;
     setCart: (cart: Cart) => void;
     cartItem: CartItem[];
     setCartItem: (cartItem: CartItem[]) => void;
     products: Product[];
-    featuredImage: Image;
-    setFeaturedImage: (featuredImage: Image) => void;
+    // featuredImage: Image;
+    // setFeaturedImage: (featuredImage: Image) => void;
     getCartById: (cartId: string) => void;
     handleAddToCart: (event: React.FormEvent, product: Product) => void;
     handleUpdateItemQuantity: (event: React.FormEvent, item: CartItem, type: string) => void;
@@ -24,57 +25,48 @@ const cartContext = React.createContext<CartContextType | undefined>(undefined);
 
 const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
 
+
+    const [isOpen, setIsOpen] = React.useState(false);
     const [cart, setCart] = React.useState<Cart>(mockCart);
     const [cartItem, setCartItem] = React.useState<CartItem[]>([]);
-    const [featuredImage, setFeaturedImage] = React.useState<Image>({
-        url: '', 
-        altText: '', 
-        width: 0, 
-        height: 0, 
-        isFeatured: false
-    });
 
-    useEffect(() => {
-      console.log('featuredImage', featuredImage);
-    }, [featuredImage])
+    // useEffect(() => {
+    //     // check if the cart already exists in localStorage this mean is does not need to create a new cart
+    //     // if not, create a new cart and set it to localStorage
+    //     const createCartIfNotExists = async () => {
+    //         const isCartEmpty = localStorage.getItem('cart') === null;
+    //         if (isCartEmpty) {
+    //             console.log('Creating a new cart...');
+    //             const res = await fetch(`http://localhost:3000/api/cart`, {
+    //                 method: "POST",
+    //                 headers: { "Content-Type": "application/json" },
+    //                 body: JSON.stringify({ ...mockCart, checkoutUrl: `${baseUrl}` })
+    //             });
 
-    useEffect(() => {
-        // check if the cart already exists in localStorage this mean is does not need to create a new cart
-        // if not, create a new cart and set it to localStorage
-        const createCartIfNotExists = async () => {
-            const isCartEmpty = localStorage.getItem('cart') === null;
-            if (isCartEmpty) {
-                console.log('Creating a new cart...');
-                const res = await fetch(`/api/carts`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...mockCart, checkoutUrl: `${baseUrl}` })
-                });
+    //             if (!res.ok) {
+    //                 throw new Error("Failed to create cart");
+    //             }
 
-                if (!res.ok) {
-                    throw new Error("Failed to create cart");
-                }
+    //             const data = await res.json();
 
-                const data = await res.json();
+    //             setCart(data.cart);
+    //             localStorage.setItem('cartId', data.cart.id);
+    //         } else {
+    //             console.log('Cart already exists in localStorage:', localStorage.getItem('cartId'));
+    //             const res = await fetch(`http://localhost:3000/api/cart?id=${localStorage.getItem('cartId')?.slice(1, -1)}`);
+    //             if (!res.ok) {
+    //                 throw new Error("Failed to fetch cart");
+    //             }
+    //             const data = await res.json();
+    //             console.log('Fetched cart:', data.cart);
+    //             setCart(data.cart);
+    //             setCartItem(data.cart.lines);
+    //         }
+    //     }
 
-                setCart(data.cart);
-                localStorage.setItem('cart', JSON.stringify(data.cart.id));
-            } else {
-                console.log('Cart already exists in localStorage:', localStorage.getItem('cart'));
-                const res = await fetch(`/api/carts/cart?cartId=${localStorage.getItem('cart')?.slice(1, -1)}`);
-                if (!res.ok) {
-                    throw new Error("Failed to fetch cart");
-                }
-                const data = await res.json();
-                console.log('Fetched cart:', data.cart);
-                setCart(data.cart);
-                setCartItem(data.cart.lines);
-            }
-        }
+    //     createCartIfNotExists();
 
-        createCartIfNotExists();
-
-    }, []);
+    // }, []);
 
     // this is for test if the cart is updated or not
     // this will log the cart whenever it changes
@@ -82,44 +74,19 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
         console.log('cart', cart);
     }, [cart]);
 
-    // 
-    React.useEffect(() => {
-        // Update the cart state whenever cartItem changes
-        // This will also update the total quantity and cost based on the cartItem array
-        setCart((prevCart) => ({
-            ...prevCart,
-            lines: cartItem,
-            totalQuantity: cartItem.reduce((acc, item) => acc + item.quantity, 0),
-            cost: {
-                subtotalAmount: {
-                    amount: cartItem.reduce((total, item) => total + (Number(item.cost.totalAmount.amount) * item.quantity), 0).toString(),
-                    currencyCode: "USD"
-                },
-                totalAmount: {
-                    amount: (cartItem.reduce((total, item) => total + (Number(item.cost.totalAmount.amount) * item.quantity), 0) + Number(prevCart.cost.totalTaxAmount.amount)).toString(), // Replace with the appropriate calculation or value
-                    currencyCode: "USD"
-                },
-                totalTaxAmount: {
-                    amount: prevCart.cost.totalTaxAmount.amount, // Replace with the appropriate calculation or value
-                    currencyCode: prevCart.cost.totalTaxAmount.currencyCode,
-                }
-            }
-        }));
-    }, [cartItem]);
-
-    
-    React.useEffect(() => {
-        console.log('cart', cart);
-    }, [cart]);
-
     // check if the item already exists in the cart
     const checkExistingItem = (product: Product) => {
-        return cartItem.find((item) => item.productId === product.id);
+        // check if the cartItem is empty
+        if (cartItem.length !== 0) {
+          return cartItem.find((item) => item.productId === product.id);
+        }
+        
+        return undefined;
     }
     
     // create cart item
     // if not, create a new cart item and add it to the cart
-    const createCartItem = async (product: Product): Promise<CartItem> => {
+    const createCartItem = async (product: Product) => {
             
         if (!product.variants[0]) {
           throw new Error('Product does not have variants');
@@ -156,7 +123,7 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
         // get cartId from localStorage
         const cartId = localStorage.getItem('cart');
 
-        const res = await fetch(`/api/carts/items?cartId=${cartId?.slice(1, cartId.length - 1)}&productId=${product.id}`, {
+        const res = await fetch(`http://localhost:3000/api/cart/items?cartId=${cartId?.slice(1, cartId.length - 1)}&productId=${product.id}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -175,22 +142,13 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
           }
 
           console.log('Item added to cart:', data.cartItem);
-
-          const featuredImage = data.cartItem.product.images.find((image: any) => image.isFeatured);
-
-          setFeaturedImage(featuredImage);
-
-          const updatedCartItem = { ...data.cartItem, product: { ...data.cartItem.product, featuredImage: { ...featuredImage } } };
-
-          console.log('featuredImage', featuredImage);
-          console.log('updatedCartItem', updatedCartItem);
-        
-        return updatedCartItem;
+          setCartItem((prev) => [...prev, data.cartItem]);
+          setIsOpen(true);
     }
 
     const getCartById = async (cartId: string) => {
         console.log('cartId', cartId);
-        const res = await fetch(`/api/carts/cart?cartId=${cartId}`, {
+        const res = await fetch(`http://localhost:3000/api/cart?id=${cartId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -219,27 +177,23 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
         // check if the product is already in the cart
         const item: CartItem | undefined = checkExistingItem(product);
 
-        console.log(item);  
-        
+        console.log('item', item);
+
         if(item) {
 
             // check if the same item already exists in the cart with the same id and same variant
-            console.log('already in cart', item);
-
             handleUpdateItemQuantity(event, item, "plus")
-       
+
         } else {
-          
-          const item = await createCartItem(product);
-          const newItem: CartItem[] = [...cartItem, item];
-          
-          setCartItem(newItem);
+          await createCartItem(product);
         }
       
       }
 
     const handleUpdateItemQuantity = async (event: React.FormEvent, item: CartItem, type: string) => {
         event.preventDefault();
+
+        console.log('item', item);
     
         const updatedCart = cartItem.map((cartItem: CartItem) => {
           if (cartItem.id === item.id) {
@@ -253,8 +207,9 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
         });
     
         setCartItem(updatedCart);
-    
-        const res = await fetch(`/api/carts/items?id=${item.id}`, {
+        setIsOpen(true);
+
+        const res = await fetch(`http://localhost:3000/api/cart/items?id=${item.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -282,8 +237,10 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
 
     const handleRemoveFromCart = async (event: React.FormEvent, item: CartItem) => {
         event.preventDefault();
-    
-        const res = await fetch(`/api/carts/items?id=${item.id}`, {
+
+        console.log('item', item);
+
+        const res = await fetch(`http://localhost:3000/api/cart/items?id=${item.id}`, {
           method: 'DELETE',
         });
     
@@ -308,13 +265,13 @@ const CartProviderContext = ({ children }: {children: React.ReactNode}) => {
     
     return (
         <cartContext.Provider value={{ 
+            isOpen,
+            setIsOpen,
             cart, 
             setCart, 
             cartItem, 
             setCartItem, 
             products,
-            featuredImage,
-            setFeaturedImage,
             getCartById,
             handleAddToCart,
             handleUpdateItemQuantity, 

@@ -349,7 +349,7 @@ export async function getCollectionProducts({
 
   console.log('collectionHandle', collectionHandle);
 
-  return addFeaturedImage(collectionHandle?.product);
+  return collectionHandle?.product || [];
 }
 
 export async function getCollections(): Promise<Collection[]> {
@@ -359,7 +359,7 @@ export async function getCollections(): Promise<Collection[]> {
 
     console.log('Fetching collections...');
 
-    const res = await fetch(`${baseUrl}/api/collections`);
+    const res = await fetch(`http://localhost:3000/api/collections`);
     
     if (!res.ok) {
         throw new Error(`Failed to fetch collections: ${res.statusText}`);
@@ -478,7 +478,7 @@ export async function getProducts({
   cacheTag(TAGS.products);
   cacheLife('days');
 
-  const res = await fetch(`${baseUrl}/api/products`);
+  const res = await fetch(`http://localhost:3000/api/products`);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch products: ${res.statusText}`);
@@ -493,7 +493,7 @@ export async function getProducts({
       return query ? product.title.toLowerCase().includes(query.toLowerCase()) : true;
   });
 
-  return addFeaturedImage(query ? searchResult : data.products);
+  return query ? searchResult : data.products;
 }
 
 export const addFeaturedImage = (products: any) => {

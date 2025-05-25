@@ -10,7 +10,7 @@ export default function ProductGridItems({ products }: { products: Product[] }) 
         <Grid.Item key={index} className="animate-fadeIn">
           <Link
             className="relative inline-block h-full w-full"
-            href={`/product/${product.handle}`}
+            href={`/product/${product.id}`}
             prefetch={true}
           >
             <GridTileImage

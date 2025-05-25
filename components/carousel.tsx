@@ -1,10 +1,14 @@
 import { getProducts } from "lib/shopify";
 import Link from "next/link";
 import { GridTileImage } from "./grid/tile";
+import { FilterProducts } from "app/requests/product";
 
 export async function Carousel() {
-  
-  const products = await getProducts({ query: '', reverse: true, sortKey: 'RELEVANT' });
+  const products = await FilterProducts({
+    query: "",
+    reverse: true,
+    sortKey: "RELEVANT"
+  });
 
   if (!products?.length) return null;
 
@@ -16,10 +20,10 @@ export async function Carousel() {
       <ul className="flex animate-carousel gap-4">
         {carouselProducts.map((product, i) => (
           <li
-            key={`${product.handle}${i}`}
+            key={`${product.id}`}
             className="relative aspect-square h-[30vh] max-h-[275px] w-2/3 max-w-[475px] flex-none md:w-1/3"
           >
-            <Link href={`/product/${product.handle}`} className="relative h-full w-full">
+            <Link href={`/product/${product.id}`} className="relative h-full w-full">
               <GridTileImage
                 alt={product.title}
                 label={{

@@ -1,8 +1,9 @@
 import { Cart, Product, ShopifyCollection } from "./shopify/types";
+import { baseUrl } from "./utils";
 
 export const mockCart: Cart = {
   id: "cart123",
-  checkoutUrl: "",
+  checkoutUrl: `${baseUrl}`,
   cost: {
     subtotalAmount: {
       amount: "0.00",
@@ -43,12 +44,21 @@ export const mockProduct: Product = {
     {
       id: "opt1",
       name: "Size",
-      values: ["S", "M", "L", "XL"],
+      values: [
+        { id: "s", value: "S" },
+        { id: "m", value: "M" },
+        { id: "l", value: "L" },
+        { id: "xl", value: "XL" },
+      ],
     },
     {
       id: "opt2",
       name: "Color",
-      values: ["Black", "Gray", "Navy"],
+      values: [
+        { id: "black", value: "Black" },
+        { id: "gray", value: "Gray" },
+        { id: "navy", value: "Navy" },
+      ],
     },
   ],
   variants: [
@@ -143,12 +153,21 @@ export const mockProductShoes: Product = {
     {
       id: "opt1",
       name: "Size",
-      values: ["S", "M", "L", "XL"],
+      values: [
+        { id: "s", value: "S" },
+        { id: "m", value: "M" },
+        { id: "l", value: "L" },
+        { id: "xl", value: "XL" },
+      ],
     },
     {
       id: "opt2",
       name: "Color",
-      values: ["Black", "Gray", "Navy"],
+      values: [
+        { id: "black", value: "Black" },
+        { id: "gray", value: "Gray" },
+        { id: "navy", value: "Navy" },
+      ],
     },
   ],
   variants: [
@@ -250,12 +269,21 @@ export const mockProductHeadwear: Product = {
     {
       id: "opt1",
       name: "Size",
-      values: ["S", "M", "L", "XL"],
+      values: [
+        { id: "s", value: "S" },
+        { id: "m", value: "M" },
+        { id: "l", value: "L" },
+        { id: "xl", value: "XL" },
+      ],
     },
     {
       id: "opt2",
       name: "Color",
-      values: ["Black", "Gray", "Navy"],
+      values: [
+        { id: "black", value: "Black" },
+        { id: "gray", value: "Gray" },
+        { id: "navy", value: "Navy" },
+      ],
     },
   ],
   variants: [

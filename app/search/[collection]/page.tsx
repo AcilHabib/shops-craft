@@ -1,28 +1,16 @@
-import { getCollectionProducts } from 'lib/shopify';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { getCollection, getCollectionProducts } from 'app/requests/collections';
 import Grid from 'components/grid';
 import ProductGridItems from 'components/layout/product-grid-items';
 import { defaultSort, sorting } from 'lib/constants';
-// import { products } from 'lib/mock';
-import { ShopifyCollection } from 'lib/shopify/types';
 
 export async function generateMetadata(props: {
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  // const collection = await getCollection(params.collection);
-  const collection: ShopifyCollection = {
-      handle: "shirts",
-      title: "Shirts",
-      description: "Shirts",
-      seo: {
-        title: "Shirts",
-        description: "Shirts",
-      },
-      updatedAt: "2023-10-01T00:00:00Z",
-    }
+  const collection = await getCollection(params.collection);
 
   if (!collection) return notFound();
 

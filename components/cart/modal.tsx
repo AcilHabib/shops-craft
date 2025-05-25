@@ -5,14 +5,14 @@ import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import LoadingDots from 'components/loading-dots';
 import Price from 'components/price';
+import { useCartModalContext } from 'context/CartSidebarModalContext';
 import { DEFAULT_OPTION } from 'lib/constants';
+import { CartItem } from 'lib/shopify/types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { createCartAndSetCookie, setCookies } from './actions';
-// import { useCart } from './cart-context';
 import { redirect } from 'next/navigation';
+import React, { Fragment, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { useMyCart } from './CartProvider';
 import { DeleteItemButton } from './delete-item-button';
 import { EditItemQuantityButton } from './edit-item-quantity-button';
@@ -23,39 +23,42 @@ type MerchandiseSearchParams = {
 };
 
 export default function CartModal() {
-  const { cart, featuredImage } = useMyCart();
-  const [isOpen, setIsOpen] = useState(false);
-  const quantityRef = useRef(cart?.totalQuantity);
+  const { cart, cartItems, fetchCart, quantity } = useCartModalContext();
+  const [lines, setLines] = React.useState<CartItem[]>([]);
+  const { isOpen, setIsOpen } = useMyCart();
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
+  React.useEffect(() => {
+    fetchCart();
+  }, []);
+
+  // useEffect(() => {
+  //   if (
+  //     cart?.totalQuantity &&
+  //     cart?.totalQuantity !== quantityRef.current &&
+  //     cart?.totalQuantity > 0
+  //   ) {
+  //     if (!isOpen) {
+  //       setIsOpen(true);
+  //     }
+  //     quantityRef.current = cart?.totalQuantity;
+  //   }
+  // }, [isOpen, cart?.totalQuantity, quantityRef]);
+
   useEffect(() => {
-    if (!cart) {
-      createCartAndSetCookie();
-    } else {
-      setCookies('cartId', cart?.id || '');
-    }
+    console.log('CartModal mounted');
+    const cartId = localStorage.getItem('cartId');
+    console.log('cart: ',cartId);
+    console.log("cartItems: ", cartItems);
+    setLines(cartItems || []);
+    setIsOpen(true);
   }, [cart]);
-
-  useEffect(() => {
-    if (
-      cart?.totalQuantity &&
-      cart?.totalQuantity !== quantityRef.current &&
-      cart?.totalQuantity > 0
-    ) {
-      if (!isOpen) {
-        setIsOpen(true);
-      }
-      quantityRef.current = cart?.totalQuantity;
-    }
-  }, [isOpen, cart?.totalQuantity, quantityRef]);
-
-  useEffect(() => {}, [cart]);
 
   return (
     <>
       <button aria-label="Open cart" onClick={openCart}>
-        <OpenCart quantity={cart?.totalQuantity} />
+        <OpenCart quantity={quantity} />
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
@@ -87,7 +90,7 @@ export default function CartModal() {
                 </button>
               </div>
 
-              {!cart || cart.lines.length === 0 ? (
+              {lines.length === 0 ? (
                 <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
                   <ShoppingCartIcon className="h-16" />
                   <p className="mt-6 text-center text-2xl font-bold">
@@ -97,11 +100,9 @@ export default function CartModal() {
               ) : (
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                   <ul className="grow overflow-auto py-4">
-                  {cart.lines.map((item, i) => 
-                    item.merchandise.map((merchandise) =>
-                      merchandise.product.map((product) => (
+                  {lines?.map((item, i) => (
                         <li
-                          key={`${i}-${product.id}`}
+                          key={`${i}-${item.product?.id}`}
                           className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
                         >
                             <div className="relative flex w-full flex-row justify-between px-1 py-4">
@@ -117,23 +118,23 @@ export default function CartModal() {
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
-                                    src={featuredImage.url}
-                                    alt={featuredImage.altText}
+                                    src={item.product?.featuredImage.url || ''}
+                                    alt={item.product?.title || ''}
                                   />
                                 </div>
                                 <Link
-                                  href={`/product/${product.handle}`}
+                                  href={`/product/${item.product?.handle}`}
                                   onClick={closeCart}
                                   className="z-30 ml-2 flex flex-row space-x-4"
                                 >
                                   <div className="flex flex-1 flex-col text-base">
                                     <span className="leading-tight">
-                                      {product.title}
+                                      {item.product?.title}
                                     </span>
-                                    {merchandise.title !==
+                                    {item.product?.title !==
                                     DEFAULT_OPTION ? (
                                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {merchandise.title}
+                                        {item.product?.title}
                                       </p>
                                     ) : null}
                                   </div>
@@ -151,32 +152,34 @@ export default function CartModal() {
                                   <EditItemQuantityButton
                                     item={item}
                                     type="minus"
+                                    quantity={quantity}
                                     optimisticUpdate={() => {}}
                                   />
                                   <p className="w-6 text-center">
                                     <span className="w-full text-sm">
-                                      {item.quantity}
+                                      {quantity}
                                     </span>
                                   </p>
                                   <EditItemQuantityButton
                                     item={item}
                                     type="plus"
+                                    quantity={quantity}
                                     optimisticUpdate={() => {}}
                                   />
                                 </div>
                               </div>
                             </div>
                           </li>
-                        ))))}
+                        ))}
                   </ul>
                   <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
                       <p>Taxes</p>
-                      <Price
+                      {/* <Price
                         className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalTaxAmount.amount}
-                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                      />
+                        amount={cart?.cost?.totalTaxAmount.amount}
+                        currencyCode={cart?.cost?.totalTaxAmount.currencyCode}
+                      /> */}
                     </div>
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                       <p>Shipping</p>
@@ -184,14 +187,23 @@ export default function CartModal() {
                     </div>
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                       <p>Total</p>
-                      <Price
+                      {/* <Price
                         className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                      />
+                        amount={cart.cost?.totalAmount.amount}
+                        currencyCode={cart.cost?.totalAmount.currencyCode}
+                      /> */}
                     </div>
                   </div>
-                  <form action={() => redirect(`${cart.checkoutUrl}/checkout/${cart.id}`)}>
+                  <form
+                    action={(e) => {
+                      if (cart && cart.checkoutUrl && cart.id) {
+                        console.log(cart.checkoutUrl);
+                        redirect(`http://localhost:3001/checkout/${cart.id}/`);
+                      } else {
+                        console.warn('Cart or checkoutUrl is not available.');
+                      }
+                    }}
+                  >
                     <CheckoutButton />
                   </form>
                 </div>

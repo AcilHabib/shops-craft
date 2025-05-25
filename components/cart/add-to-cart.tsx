@@ -5,9 +5,10 @@ import clsx from 'clsx';
 import { addItem } from 'components/cart/actions';
 import { useProduct } from 'components/product/product-context';
 import { Product, ProductVariant } from 'lib/shopify/types';
-import { useActionState } from 'react';
+import React, { useActionState } from 'react';
 // import { useCart } from './cart-context';
-import { useMyCart } from './CartProvider';
+import { useCartModalContext } from 'context/CartSidebarModalContext';
+import { ShowToast }from 'components/ShowToast';
 
 function SubmitButton({
   availableForSale,
@@ -60,12 +61,9 @@ function SubmitButton({
 
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
-  // const { addCartItem } = useCart();
-  const { handleAddToCart } = useMyCart();
+  const { handleAddToCart } = useCartModalContext();
   const { state } = useProduct();
   const [message, formAction] = useActionState(addItem, null);
-  // const [cartState, setCartItem] = useState<CartItem[]>([]);
-
   const variant = variants.find((variant: ProductVariant) =>
     variant.selectedOptions?.every(
       (option) => option.value === state[option.name.toLowerCase()]
@@ -80,11 +78,7 @@ export function AddToCart({ product }: { product: Product }) {
 
   return (
     <form
-      action={async () => {
-        // addCartItem(finalVariant, product);
-        addItemAction();
-      }}
-      onSubmit={(e) => {handleAddToCart(e, product)}}
+      onSubmit={async (e) => {e.preventDefault(); await handleAddToCart(product)}}
     >
       <SubmitButton
         availableForSale={availableForSale}

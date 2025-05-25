@@ -8,32 +8,35 @@ import { ProductProvider } from 'components/product/product-context';
 import { ProductDescription } from 'components/product/product-description';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
 // import { getProduct, getProductRecommendations } from 'lib/shopify';
-import { getProducts } from 'lib/shopify';
+import { getCollectionProducts } from 'app/requests/collections';
+import { getProductById } from 'app/requests/product';
 import { Image } from 'lib/shopify/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
 export async function generateMetadata(props: {
-  params: Promise<{ handle: string }>;
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
+  // const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
   // const product = await getProduct(params.handle);
-  const getProductsByHandle = (handle: string) => {
-    return products.find((product) => product.handle === handle);
+  const getProductsByHandle = async (id: string) => {
+    return await getProductById(id);
   }
-  const product = getProductsByHandle(params.handle);
+  const product = await getProductsByHandle(params.id);
 
   // console.log('product', product);
 
   if (!product) return notFound();
 
+  console.log('product', product);
+
   const { url, width, height, altText: alt } = product.featuredImage || {};
   const indexable = !product.tags.includes(HIDDEN_PRODUCT_TAG);
 
   return {
-    title: product.seo.title || product.title,
-    description: product.seo.description || product.description,
+    title: product.seo?.title || product.title,
+    description: product.seo?.description || product.description,
     robots: {
       index: indexable,
       follow: indexable,
@@ -57,15 +60,15 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function ProductPage(props: { params: Promise<{ handle: string }> }) {
+export default async function ProductPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
-  const getProductsByHandle = (handle: string) => {
+  // const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
+  const getProductsById = async (id: string) => {
     // Mock data for testing
-    return products.find((product) => product.handle === handle);
+    return await getProductById(id);
   }
-  const product = getProductsByHandle(params.handle);
-  
+  const product = await getProductsById(params.id);
+
   // const product = await getProduct(params.handle);
 
   if (!product) return notFound();
@@ -118,16 +121,16 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
             </Suspense>
           </div>
         </div>
-        <RelatedProducts id={product.id} />
+        <RelatedProducts collection={product?.collection?.title} />
       </div>
       <Footer />
     </ProductProvider>
   );
 }
 
-async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });;// Mock data for testing
-  // const relatedProducts = await getProductRecommendations(id);
+async function RelatedProducts({ collection }: { collection: string }) {
+
+  const relatedProducts = await getCollectionProducts({collection, sortKey: 'RELEVANT', reverse: true });
 
   if (!relatedProducts.length) return null;
 
@@ -142,7 +145,7 @@ async function RelatedProducts({ id }: { id: string }) {
           >
             <Link
               className="relative h-full w-full"
-              href={`/product/${product.handle}`}
+              href={`/product/${product.id}`}
               prefetch={true}
             >
               <GridTileImage

@@ -1,10 +1,12 @@
 "use client";
 
+import { createOrder } from "app/requests/order";
 // import { useCart } from "components/cart/cart-context";
-import { useMyCart } from "components/cart/CartProvider";
 import { DeleteItemButton } from "components/cart/delete-item-button";
 import { EditItemQuantityButton } from "components/cart/edit-item-quantity-button";
 import Price from "components/price";
+import { ShowToast } from "components/ShowToast";
+import { useCartModalContext } from "context/CartSidebarModalContext";
 import { DEFAULT_OPTION } from "lib/constants";
 import {
   ArrowLeft,
@@ -13,8 +15,9 @@ import {
   CreditCard,
   Info,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function CheckoutPage() {
 
@@ -32,11 +35,24 @@ export default function CheckoutPage() {
   // const [ paymentMethod, setPaymentMethod ] = useState("creditCard");
 
   const [currentStep, setCurrentStep] = useState("information"); // information, shipping, payment
-  const { cart, featuredImage, getCartById } = useMyCart();
+  // const { cart, getCartById } = useMyCart();
+  const { cart, cartItems, fetchCart, quantity } = useCartModalContext();
+  const [lines, setLines] = useState(cart?.lines || []);
 
   type MerchandiseSearchParams = {
     [key: string]: string;
   };
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  useEffect(() => {
+    console.log("Cart updated:", cart);
+    console.log("Cart lines:", cart?.lines);
+    console.log("Cart items:", cartItems);
+    setLines(cartItems || cart?.lines || []);
+  }, [cart]);
 
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -44,53 +60,20 @@ export default function CheckoutPage() {
 
       console.log(emailOrPhone, firstName, lastName, country, address, apartment, city, state, zip);
 
-      const cartId = localStorage.getItem("cart")?.slice(1, -1) || "";
+      const cartId = localStorage.getItem("cartId");
 
       console.log(cartId);
 
-      const res = await fetch(`/api/orders/customer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: emailOrPhone,
-          firstName,
-          lastName,
-          phone: "",
-          order: {
-            deleveryType: shippingMethod,
-          },
-          cartId,
-          address: {
-            address,
-            appartment: apartment,
-            city,
-            state,
-            zipCode: zip,
-          },
-        }),
-      });
+      const Order = await createOrder(cartId || "", shippingMethod);
 
-      const data = await res.json();
-      
-      if (!res.ok) {
-        console.error("Error creating customer:", data.message);
+      if (!Order) {
+        console.error("Failed to create order");
         return;
       }
 
-      console.log("Customer created:", data.order);
+      console.log("Order created successfully:", Order);
+      ShowToast("Order created successfully", "success");
   }
-
-  React.useEffect(() => {
-    const cartId = localStorage.getItem("cart")?.slice(1, -1) || "";
-    console.log(cartId);
-    if (cartId) {
-      getCartById(cartId);
-    } else {
-      console.error("No cart ID found in local storage");
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -515,7 +498,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right side - Order summary */}
-          {!cart || cart.lines.length === 0 ? (
+          {lines.length === 0 ? (
             <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
               {/* <ShoppingCart className="h-16" /> */}
               <p className="mt-6 text-center text-2xl font-bold">
@@ -525,9 +508,7 @@ export default function CheckoutPage() {
           ) : (
             <div className="flex h-full flex-col justify-between overflow-hidden p-1">
               <ul className="grow overflow-auto py-4">
-              {cart.lines.map((item, i) => 
-                    item.merchandise.map((merchandise) =>
-                      merchandise.product.map((product) => (
+              {lines.map((item, i) =>  (
                           <li
                             key={i}
                             className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
@@ -541,13 +522,13 @@ export default function CheckoutPage() {
                               </div>
                               <div className="flex flex-row">
                                 <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                  {/* <Image
+                                  <Image
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
-                                    src={featuredImage.url}
-                                    alt={featuredImage.altText}
-                                  /> */}
+                                    src={item.product?.featuredImage.url || ""}
+                                    alt={item.product?.title || "Product image"}
+                                  />
                                 </div>
                                 <Link
                                   href={``} // /product/${product.handle}
@@ -555,11 +536,11 @@ export default function CheckoutPage() {
                                 >
                                   <div className="flex flex-1 flex-col text-base">
                                     <span className="leading-tight">
-                                      {product.title}
+                                      {item.product?.title}
                                     </span>
-                                    {merchandise.title !== DEFAULT_OPTION ? (
+                                    {item.product?.title !== DEFAULT_OPTION ? (
                                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {merchandise.title}
+                                        {item.product?.title}
                                       </p>
                                     ) : null}
                                   </div>
@@ -575,32 +556,34 @@ export default function CheckoutPage() {
                                   <EditItemQuantityButton
                                     item={item}
                                     type="minus"
+                                    quantity={quantity}
                                     optimisticUpdate={() => {}}
                                   />
                                   <p className="w-6 text-center">
                                     <span className="w-full text-sm">
-                                      {item.quantity}
+                                      {quantity}
                                     </span>
                                   </p>
                                   <EditItemQuantityButton
                                     item={item}
                                     type="plus"
+                                    quantity={quantity}
                                     optimisticUpdate={() => {}}
                                   />
                                 </div>
                               </div>
                             </div>
                           </li>
-                        ))))}
+                        ))}
               </ul>
               <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                 <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
                   <p>Taxes</p>
-                  <Price
+                  {/* <Price
                     className="text-right text-base text-black dark:text-white"
                     amount={cart.cost.totalTaxAmount.amount}
                     currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                  />
+                  /> */}
                 </div>
                 <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                   <p>Shipping</p>
@@ -608,11 +591,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                   <p>Total</p>
-                  <Price
+                  {/* <Price
                     className="text-right text-base text-black dark:text-white"
                     amount={cart.cost.totalAmount.amount}
                     currencyCode={cart.cost.totalAmount.currencyCode}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

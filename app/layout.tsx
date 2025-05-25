@@ -4,6 +4,7 @@ import { WelcomeToast } from 'components/welcome-toast';
 import { GeistSans } from 'geist/font/sans';
 // import { getCart } from 'lib/shopify';
 import CartProviderContext from 'components/cart/CartProvider';
+import { CartModalProvider } from 'context/CartSidebarModalContext';
 import { baseUrl } from 'lib/utils';
 import { ReactNode } from 'react';
 import { Toaster } from 'sonner';
@@ -34,16 +35,18 @@ export default async function RootLayout({
   return (
     <html lang="en" className={GeistSans.variable}>
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
-        <CartProviderContext>
-          {/* <CartProvider cartPromise={Promise.resolve(null)}> */}
-            <Navbar />
-            <main>
-              {children}
-              <Toaster closeButton />
-              <WelcomeToast />
-            </main>
-          {/* </CartProvider> */}
-        </CartProviderContext>
+        <CartModalProvider>
+          <CartProviderContext>
+            {/* <CartProvider cartPromise={Promise.resolve(null)}> */}
+              <Navbar />
+              <main>
+                {children}
+                <Toaster closeButton />
+                <WelcomeToast />
+              </main>
+            {/* </CartProvider> */}
+          </CartProviderContext>
+        </CartModalProvider>
       </body>
     </html>
   );

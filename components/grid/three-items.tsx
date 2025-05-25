@@ -1,7 +1,6 @@
+import { FilterProducts } from 'app/requests/product';
 import { GridTileImage } from 'components/grid/tile';
 import { mockProduct, mockProductHeadwear, mockProductShoes } from 'lib/mock';
-import { getProducts } from 'lib/shopify';
-// import { getCollectionProducts } from 'lib/shopify';
 import type { Product } from 'lib/shopify/types';
 import Link from 'next/link';
 
@@ -20,7 +19,7 @@ function ThreeItemGridItem({
     >
       <Link
         className="relative block aspect-square h-full w-full"
-        href={`/product/${item.handle}`}
+        href={`/product/${item.id}`}
         prefetch={true}
       >
         <GridTileImage
@@ -44,7 +43,11 @@ function ThreeItemGridItem({
 }
 
 export async function ThreeItemGrid() {
-  const products = await getProducts({query: '', reverse: true, sortKey: 'RELEVANT'});
+  const products = await FilterProducts({
+    query: '',
+    reverse: false,
+    sortKey: 'BEST_SE LLING'
+  });
 
   const firstProduct = products[0] || mockProduct;
   const secondProduct = products[1] || mockProductHeadwear;
