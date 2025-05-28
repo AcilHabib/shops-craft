@@ -325,6 +325,7 @@ export async function getCollection(
 
   return reshapeCollection(res.body.data.collection);
 }
+//just made this change to push the code to the org repo
 
 export async function getCollectionProducts({
   collection,
