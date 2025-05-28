@@ -1,4 +1,4 @@
-export const createOrder = async (cartId: string, deliveryType: string) => {
+export const createOrder = async (cartId: string, customerId: string, deliveryType: string) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders?cartId=${cartId}`, {
         method: 'POST',
         headers: {

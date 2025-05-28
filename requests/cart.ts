@@ -1,4 +1,4 @@
-import { CartItem } from "../../lib/shopify/types";
+import { CartItem } from "@/types";
 
 export const createCart = async (userId: string) => {
     try {
