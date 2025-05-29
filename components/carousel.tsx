@@ -1,7 +1,6 @@
-import { getProducts } from "lib/shopify";
 import Link from "next/link";
+import { FilterProducts } from "requests/product";
 import { GridTileImage } from "./grid/tile";
-import { FilterProducts } from "app/requests/product";
 
 export async function Carousel() {
   const products = await FilterProducts({

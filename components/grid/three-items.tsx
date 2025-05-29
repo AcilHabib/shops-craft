@@ -1,8 +1,8 @@
-import { FilterProducts } from 'app/requests/product';
 import { GridTileImage } from 'components/grid/tile';
 import { mockProduct, mockProductHeadwear, mockProductShoes } from 'lib/mock';
 import type { Product } from 'lib/shopify/types';
 import Link from 'next/link';
+import { FilterProducts } from 'requests/product';
 
 function ThreeItemGridItem({
   item,

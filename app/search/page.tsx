@@ -1,7 +1,7 @@
-import { FilterProducts } from 'app/requests/product';
 import Grid from 'components/grid';
 import ProductGridItems from 'components/layout/product-grid-items';
 import { defaultSort, sorting } from 'lib/constants';
+import { FilterProducts } from 'requests/product';
 
 export const metadata = {
   title: 'Search',

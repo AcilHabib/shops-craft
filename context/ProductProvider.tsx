@@ -1,8 +1,8 @@
 'use client';
 
 import React from "react";
-import { ShopifyProduct, Reviews } from "../lib/shopify/types";
-import { getAllProducts, getProductById } from "../app/requests/product";
+import { getAllProducts, getProductById } from "requests/product";
+import { Reviews, ShopifyProduct } from "../lib/shopify/types";
 
 interface ProductContextType {
     products: ShopifyProduct[];
