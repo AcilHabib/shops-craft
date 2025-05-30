@@ -1,3 +1,11 @@
+import { TAGS } from "lib/constants";
+import { ShopifyProduct } from "lib/shopify/types";
+import {
+    unstable_cacheLife as cacheLife,
+    unstable_cacheTag as cacheTag
+} from 'next/cache';
+import { getAllArticles } from "./article";
+
 export const getAllProducts = async () => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`);
@@ -32,3 +40,41 @@ export const getProductById = async (id: string) => {
         throw error;
     }
 };
+
+
+export async function FilterProducts({
+  query,
+  reverse,
+  sortKey
+}: {
+    query?: string;
+    reverse?: boolean;
+    sortKey?: string;
+    }): Promise<ShopifyProduct[]> {
+    'use cache';
+    cacheTag(TAGS.products);
+    cacheLife('days');
+
+    const response = await getAllArticles();
+    if (!response) {
+        throw new Error("No products found");
+    }
+    const searchResult = response.filter((product: ShopifyProduct) => {
+        return query ? product.title.toLowerCase().includes(query.toLowerCase()) : true;
+    });
+
+    if (reverse) {
+        searchResult.reverse();
+    }
+
+    if (sortKey) {
+        searchResult.sort((a: ShopifyProduct, b: ShopifyProduct) => {
+            if (sortKey === 'PRICE') {
+                return parseFloat(a.priceRange.maxVariantPrice.amount) - parseFloat(b.priceRange.maxVariantPrice.amount);
+            }
+            return 0;
+        });
+    }
+
+    return query ? searchResult : response;
+}

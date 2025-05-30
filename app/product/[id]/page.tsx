@@ -1,15 +1,14 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { getAllArticles, getArticleById } from '@/requests/article';
+import { Article } from '@/types';
 import { GridTileImage } from 'components/grid/tile';
 import Footer from 'components/layout/footer';
 import { Gallery } from 'components/product/gallery';
 import { ProductProvider } from 'components/product/product-context';
 import { ProductDescription } from 'components/product/product-description';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
-// import { getProduct, getProductRecommendations } from 'lib/shopify';
-import { getCollectionProducts } from 'app/requests/collections';
-import { getProductById } from 'app/requests/product';
 import { Image } from 'lib/shopify/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -18,14 +17,10 @@ export async function generateMetadata(props: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  // const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
-  // const product = await getProduct(params.handle);
   const getProductsByHandle = async (id: string) => {
-    return await getProductById(id);
+    return await getArticleById(id);
   }
   const product = await getProductsByHandle(params.id);
-
-  // console.log('product', product);
 
   if (!product) return notFound();
 
@@ -65,7 +60,7 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
   // const products = await getProducts({ sortKey: 'RELEVANT', reverse: false, query: '' });
   const getProductsById = async (id: string) => {
     // Mock data for testing
-    return await getProductById(id);
+    return await getArticleById(id);
   }
   const product = await getProductsById(params.id);
 
@@ -130,7 +125,7 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
 
 async function RelatedProducts({ collection }: { collection: string }) {
 
-  const relatedProducts = await getCollectionProducts({collection, sortKey: 'RELEVANT', reverse: true });
+  const relatedProducts = await getAllArticles();
 
   if (!relatedProducts.length) return null;
 
@@ -138,7 +133,7 @@ async function RelatedProducts({ collection }: { collection: string }) {
     <div className="py-8">
       <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
       <ul className="flex w-full gap-4 overflow-x-auto pt-1">
-        {relatedProducts.map((product, index) => (
+        {relatedProducts.map((product: Article, index: number) => (
           <li
             key={index}
             className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
@@ -149,13 +144,13 @@ async function RelatedProducts({ collection }: { collection: string }) {
               prefetch={true}
             >
               <GridTileImage
-                alt={product.title}
+                alt={product.name}
                 label={{
-                  title: product.title,
-                  amount: product.priceRange.maxVariantPrice.amount,
-                  currencyCode: product.priceRange.maxVariantPrice.currencyCode
+                  title: product.name,
+                  amount: "$90.00",
+                  currencyCode: "USD"
                 }}
-                src={product.featuredImage?.url}
+                src={product?.images?.[0]?.url || ''}
                 fill
                 sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
               />
