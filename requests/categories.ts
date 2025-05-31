@@ -4,7 +4,7 @@ export const getAllCategories = async () => {
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/shop_panel/categories/get_all`
+      "http://localhost:3000/api/shop_panel/categories/get_all"
     );
 
     if (!res.ok) {
