@@ -1,14 +1,16 @@
 import CartModal from "components/cart/modal";
 import LogoSquare from "components/logo-square";
 // import { getMenu } from 'lib/shopify';
-import { getAllCategories } from "@/requests/categories"; // Assuming this path is correct based on your structure
-import { Menu } from "lib/shopify/types";
+import { Menu } from "@/lib/shopify/types";
+import { getAllCategories } from "@/requests/categories";
 import Link from "next/link";
 import { Suspense } from "react";
-import CategoriesDropdown from "./categories-dropdown"; // Import the new client component
+import { useTranslations } from "use-intl";
+import CategoriesDropdown from "./categories-dropdown";
 import MobileMenu from "./mobile-menu";
 import Search, { SearchSkeleton } from "./search";
 
+const t = useTranslations("locale");
 const { SITE_NAME } = process.env;
 
 type Category = {
@@ -19,7 +21,7 @@ type Category = {
 export async function Navbar() {
   const staticMenu: Menu[] = [
     {
-      title: "All",
+      title: t("t1"),
       path: "/search",
     },
     {
@@ -43,9 +45,7 @@ export async function Navbar() {
     <nav className="relative flex items-center justify-between p-4 lg:px-6">
       <div className="block flex-none md:hidden">
         <Suspense fallback={null}>
-          <MobileMenu
-            menu={[...staticMenu, { title: "Categories", path: "#" }]}
-          />
+          <MobileMenu menu={[...staticMenu, { title: t("t2"), path: "#" }]} />
         </Suspense>
       </div>
       <div className="flex w-full items-center">
